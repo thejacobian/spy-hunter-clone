@@ -17,7 +17,7 @@ Minimum Viable Product:
 1. Your G-6155 Interceptor spy-mobile with machine gun that fires from bottom to top of the screen.
 2. Enemy Cars: Standard Blue Cars and the "Switchblade" which will gain you points if you destroy. The latter has collision damage from the left and right as well due to tire slashers
 3. Friendly civilion vehicle obstacles: red cars and motorcycles (faster/smaller) which will slow you down, cause minor damage to you and you will not gain points for a number of seconds.
-4. Top-down and top-to-bottm scrolling landscape/road that occasionally narrows and then widens again
+4. Top-down and top-to-bottom scrolling landscape/road that occasionally narrows and then widens again
 5. Award points for enemy cars destroyed and award "extra lives/cars" at certain point thresholds.
 6. Allow for 2nd player to take a turn for high score.
 

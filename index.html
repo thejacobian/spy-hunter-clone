@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Spy Hunter Clone</title>
+    <link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css?family=Audiowide|Open+Sans" rel="stylesheet">
+</head>
+<body>
+    <div class="game-realm">
+        <div class="game-interact">
+            <h1>Spy Hunter Clone</h1>
+            <h2>Time: <span class="min">0</span>:<span class="sec">00</span></h1>
+            <h3>Level: <span class="level-meter">1</span></h3>
+            <h3>Score: <span class="score-meter">0</span></h3>
+            <h4>Lives: <span class="lives-meter">3</span></h4>
+            <h4>Missiles: <span class="missile-meter">10</span></h4>
+            <h4>Oil Slick: <span class="oil-meter">10</span></h4>
+            <button class="green button" id="start">START</button><br>
+            <button class="red button" id="pause">PAUSE</button><br>
+            <button class="button" id="shoot-gun" disabled="true">Shoot Gun</button><br>
+            <button class="button" id="fire-missile" disabled="true">Fire Missile</button><br>
+            <button class="button" id="drop-oil" disabled="true">Drop Oil</button><br>
+            <button class="blue button" id="start-over">START OVER</button><br>
+        </div>
+        <div class="game-container">
+            <h1 id="player-name">Player 1</h1>
+            <canvas id="game-canvas" width=600px height=600px></canvas>
+        </div>
+    </div>
+    <div class="game-comms" class= "clearfix">
+        <h1>The world needs you to chase the badguys and prevent a nuclear apocalypse. Click START!</h1>
+    </div>
+</body>
+<scripts>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/obstacle.js"></script>
+    <script src="js/app.js"></script>
+</scripts>
+</html>
