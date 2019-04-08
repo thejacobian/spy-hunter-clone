@@ -15,8 +15,22 @@ class Enemy {
     this.actionsArr = [];
     this.$locationArr = '';
     this.message = '';
+
+    // canvas render properties
+    this.xInit = 250;
+    this.yInit = 0;
+    this.x = 250;
+    this.y = 0;
+    this.width = 25;
+    this.height = 50;
+    this.color = 'blue';
   }
 
+  // canvas draw method
+  draw(ctx) {
+    makeRectangle(ctx, this.x, this.y, this.width, this.height, this.color, this.color, 1)
+  }
+  
   move(direction, velocity) {
     // do movement here
     return this;

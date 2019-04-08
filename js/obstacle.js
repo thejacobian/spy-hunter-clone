@@ -4,13 +4,27 @@
 
 // Terrain such as pothole, road shoulder, road beyond shoulder, water
 class Obstacle {
-  constructor(type, icon) {
+  constructor(type, icon, startX, startY, width, height, color) {
     this.type = type;
     this.icon = icon;
     this.damage = 50;
     this.speed = 0;
     this.hitpoints = 100000000;
     this.$locationArr = '';
+
+    // canvas render properties
+    this.xInit = startX;
+    this.yInit = startY;
+    this.x = startX;
+    this.y = startY;
+    this.width = width;
+    this.height = height;
+    this.color = color;
+  }
+
+  // canvas draw method
+  draw (ctx) {
+    makeRectangle(ctx, this.x, this.y, this.width, this.height, this.color, this.color, 1)
   }
 
   populate(tileX, tileY) {
@@ -29,8 +43,22 @@ class CivilianCar extends Obstacle {
     super(name, 'civilian car', icon);
     this.hitpoints = 1;
     this.speed = 1;
+
+    // canvas render properties
+    this.xInit = 400;
+    this.yInit = 300;
+    this.x = 400;
+    this.y = 300;
+    this.width = 25;
+    this.height = 50;
+    this.color = 'red';
   }
 
+  // canvas draw method
+  draw(ctx) {
+    makeRectangle(ctx, this.x, this.y, this.width, this.height, this.color, this.color, 1)
+  }
+  
   populate(tileX, tileY) {
     //place obstacle on canvas
     return this;

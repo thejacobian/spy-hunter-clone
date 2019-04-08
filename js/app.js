@@ -11,6 +11,11 @@ const playAudio = (sound) => {
   return this;
 };
 
+const printSomething = (message) => {
+  console.log(message);
+  $(myGame.$commsBar).text(message);
+};
+
 const secondsGoUp = () => {
   myGame.seconds++;
   
@@ -29,13 +34,13 @@ const secondsGoUp = () => {
     $('.sec').text(myGame.seconds);
   }
 
-  // format livesNum meter red if down to 1
-  if (myGame.activePlayer.livesNum <= 1) {
+  // format lives meter red if down to 1
+  if (myGame.activePlayer.lives <= 1) {
     $('.lives-meter').css('color', 'red');
   }
 
   // handle game state transition for things that happen at 1 min
-  if (myGame.minutes === 1 && myGame.seconds === 0) {
+  if (myGame.minutes === 0 && myGame.seconds === 30) {
     //disable unlimited retry "training" mode and start losing lives
     myGame.stillTrainingFlag = false;
   }
@@ -50,7 +55,7 @@ const secondsGoUp = () => {
     $('.level-meter').text(myGame.level);
     if (myGame.levelUpFlag) {
       myGame.level++;
-      myGame.speedMultiplier += 2;
+      myGame.speedMultiplier += 1;
 
       // handle things as the level increases
       if (myGame.level === 2) {
@@ -77,36 +82,80 @@ const secondsGoUp = () => {
 
  // do end game logic if player runs out of lives
   if (myGame.activePlayer.lives <= 0) {
-    
     // change player image to dead image/ or explosion animation
     //$('canvas').prop('src', 'images/RoombaInnards.gif');
     
     // handle custom ending depending on level achieved
     if (myGame.level < 2) {
-      myGame.message = `*** Master Spy Driver Man ${myGame.activePlayer.name} has died and the world was obliterated in a nuclear apocalypse. Game Over! ***`;
+      myGame.message = `Master Spy Driver ${myGame.activePlayer.name} has died and the world was obliterated in a nuclear blast. Game Over!`;
     } else {
-      myGame.message = `*** Master Spy Driver Man ${myGame.activePlayer.name} has died and the world was obliterated in a nuclear apocalypse. Game Over! ***`;
+      myGame.message = `Master Spy Driver ${myGame.activePlayer.name} has died and the world was obliterated in a nuclear blast. Game Over!`;
     }
-    console.log(myGame.message);
-    $(myGame.$commsBar).text(myGame.message);
-    alert(myGame.message);
-    clearInterval(mygame.timePassing);
+    printSomething(myGame.message);
+    //alert(myGame.message);
+    clearInterval(myGame.timePassing);
     myGame.timePassing = 0;
     $('#stop').click();
     $('#start').prop('disabled', true);
   }
 };
 
+const stopAnimation = () => {
+  cancelAnimationFrame(myGame.requestID)
+  myGame.animationRunningFlag = false;
+};
+
+const animate = () => {
+  // code in here will be repeated 60 times/sec (approx)
+  myGame.xFrame++; // will allow us to access how many frames
+  myGame.animationRunningFlag = true; // this is a flag -- we will use it to prevent running animation more than once
+
+  myGame.activePlayer.move(myGame.ctx);
+  //clearCanvas(this.ctx); // prevent trailers!
+  myGame.activePlayer.draw(myGame.ctx); // that's better
+
+  myGame.obstacleArray[0].draw(myGame.ctx);
+
+  // check for collision with obstacle
+  const obstacle = myGame.obstacleArray[0];
+  if (myGame.activePlayer.checkCollision(obstacle)) {
+    if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
+      printSomething(`Collision with ${obstacle.type}!`);
+      myGame.activePlayer.score -= obstacle.damage;
+      $('.score-meter').text(myGame.activePlayer.score);
+      myGame.activePlayer.hitpoints -= obstacle.damage;
+      myGame.activePlayer.justDamagedFlag = true;
+      setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 3000);
+    }
+  }
+
+  if (myGame.activePlayer.hitpoints < 1) {
+    myGame.activePlayer.lives--;
+    $('.lives-meter').text(myGame.activePlayer.lives);
+    myGame.activePlayer.hitpoints = 100;
+    myGame.message = `You lost a life! Lives remaining: ${myGame.activePlayer.lives}`;
+    printSomething(myGame.message);
+  }
+
+  if (myGame.activePlayer.lives > 0) {
+    // recursion -- you are creating a situation where the function calls itself 
+    myGame.requestID = window.requestAnimationFrame(animate);
+  }
+}
+
 // do stuff that happens on start button click
 $('#start').on('click', () => {
   myGame.start();
   myGame.timePassing = setInterval(secondsGoUp, 1000);
+  myGame.xFrame = 0;
+  animate();
 });
 
 // do stuff that happens on pause button click
 $('#pause').on('click', () => {
   myGame.pause();
   clearInterval(myGame.timePassing);
+  stopAnimation();
 });
 
 // do stuff that happens on shoot-gun button click
@@ -136,6 +185,33 @@ $('#start-over').on('click', () => {
     myGame = new Game('Alternating', 'audio/01-SpyHunter-A8-SpyHunterTheme.ogg', 'images/spy-hunter_title_dos.png');
 });
 
+$(document).on('keydown', (e) => {
+  console.log(e);
+  //myGame.activePlayer.move(myGame.ctx, e.key, myGame.gridSize);
+  if(['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'].includes(e.key)) {
+    myGame.activePlayer.setDirection(e.key);
+  }
+
+  // so that we can restart animation 
+  if(e.key === "1") {
+    if(!animationRunning) animate();
+    else console.log("nope");
+  }
+  if(e.key === "2") {
+    stopAnimation();
+  }
+});
+
+$(document).on('keyup', (e) => {
+  console.log(e);
+  if(['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'].includes(e.key)) {
+    myGame.activePlayer.unsetDirection(e.key);
+  }
+});
+
+// $('window').keydown(function() {
+//   alert( "Handler for .keydown() called." );
+// });
 // /* <div class = "game-square"
 //     x = 0
 //     y = -1 */}
