@@ -10,7 +10,6 @@ class Obstacle {
     this.damage = 50;
     this.speed = 0;
     this.hitpoints = 100000000;
-    this.$locationArr = '';
 
     // canvas render properties
     this.xInit = startX;
@@ -24,7 +23,7 @@ class Obstacle {
 
   // canvas draw method
   draw (ctx) {
-    makeRectangle(ctx, this.x, this.y, this.width, this.height, this.color, this.color, 1)
+    makeRectangle(ctx, this.x, this.y, this.width, this.height, 'none', this.color, 1)
   }
 
   populate(tileX, tileY) {
@@ -39,8 +38,8 @@ class Obstacle {
 }
 
 class CivilianCar extends Obstacle {
-  constructor(name, type, icon) {
-    super(name, 'civilian car', icon);
+  constructor(type, icon) {
+    super('civilian car', icon);
     this.hitpoints = 1;
     this.speed = 1;
 
@@ -76,8 +75,8 @@ class CivilianCar extends Obstacle {
 }
 
 class CivilianMotorbike extends Obstacle {
-  constructor(name, type, icon) {
-    super(name, 'civilian motorbike', icon);
+  constructor(type, icon) {
+    super('civilian motorbike', icon);
     this.hitpoints = 1;
     this.speed = 4;
   }

@@ -11,11 +11,6 @@ const playAudio = (sound) => {
   return this;
 };
 
-const printSomething = (message) => {
-  console.log(message);
-  $(myGame.$commsBar).text(message);
-};
-
 const secondsGoUp = () => {
   myGame.seconds++;
   
@@ -39,8 +34,8 @@ const secondsGoUp = () => {
     $('.lives-meter').css('color', 'red');
   }
 
-  // handle game state transition for things that happen at 1 min
-  if (myGame.minutes === 0 && myGame.seconds === 30) {
+  // handle game state transition for things that happen at 0 min 10 seconds
+  if (myGame.minutes === 0 && myGame.seconds === 10) {
     //disable unlimited retry "training" mode and start losing lives
     myGame.stillTrainingFlag = false;
   }
@@ -91,7 +86,7 @@ const secondsGoUp = () => {
     } else {
       myGame.message = `Master Spy Driver ${myGame.activePlayer.name} has died and the world was obliterated in a nuclear blast. Game Over!`;
     }
-    printSomething(myGame.message);
+    myGame.printSomething(myGame.message);
     //alert(myGame.message);
     clearInterval(myGame.timePassing);
     myGame.timePassing = 0;
@@ -112,29 +107,33 @@ const animate = () => {
 
   myGame.activePlayer.move(myGame.ctx);
   //clearCanvas(this.ctx); // prevent trailers!
-  myGame.activePlayer.draw(myGame.ctx); // that's better
+  //myGame.activePlayer.draw(myGame.ctx); // that's better
 
-  myGame.obstacleArray[0].draw(myGame.ctx);
+  //move and draw all weapons on screen
+  myGame.activePlayer.weaponsArr.forEach(function(weapon) {
+    weapon.move(myGame.ctx);
+  });
 
-  // check for collision with obstacle
-  const obstacle = myGame.obstacleArray[0];
-  if (myGame.activePlayer.checkCollision(obstacle)) {
-    if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
-      printSomething(`Collision with ${obstacle.type}!`);
-      myGame.activePlayer.score -= obstacle.damage;
-      $('.score-meter').text(myGame.activePlayer.score);
-      myGame.activePlayer.hitpoints -= obstacle.damage;
-      myGame.activePlayer.justDamagedFlag = true;
-      setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 3000);
+  // check for collision with obstacles
+  myGame.obstacleArray.forEach(function(obstacle) {
+    if (myGame.activePlayer.checkCollision(obstacle)) {
+      if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
+        myGame.printSomething(`Collision with ${obstacle.type}!`);
+        myGame.activePlayer.score -= obstacle.damage;
+        $('.score-meter').text(myGame.activePlayer.score);
+        myGame.activePlayer.hitpoints -= obstacle.damage;
+        myGame.activePlayer.justDamagedFlag = true;
+        setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 3000);
+      }
     }
-  }
+  });
 
   if (myGame.activePlayer.hitpoints < 1) {
     myGame.activePlayer.lives--;
     $('.lives-meter').text(myGame.activePlayer.lives);
     myGame.activePlayer.hitpoints = 100;
     myGame.message = `You lost a life! Lives remaining: ${myGame.activePlayer.lives}`;
-    printSomething(myGame.message);
+    myGame.printSomething(myGame.message);
   }
 
   if (myGame.activePlayer.lives > 0) {
@@ -160,52 +159,67 @@ $('#pause').on('click', () => {
 
 // do stuff that happens on shoot-gun button click
 $('#shoot-gun').on('click', () => {
-  // myTama.feed(feedWeight);
-  // $('.hunger-meter').text(`${myTama.hunger}`);
-  // $('.tamagotchi').prop('src', 'images/RoombaFull.png');
+  myGame.activePlayer.attack('gun');
 });
 
 // do stuff that happens on fire-missile button click
 $('#fire-missile').on('click', () => {
-  // myTama.sleep(sleepWeight);
-  // $('.sleep-meter').text(`${myTama.sleepiness}`);
-  // $('.tamagotchi').prop('src', 'images/RoombaCharge.gif');
+  myGame.activePlayer.attack('missile');
 });
 
 // do stuff that happens on drop-oil button click
 $('#drop-oil').on('click', () => {
-  // myTama.play(playWeight);
-  // $('.boredom-meter').text(`${myTama.boredom}`);
-  // $('.tamagotchi').prop('src', 'images/RoombaPlay.png');
+  myGame.activePlayer.attack('oil');
 });
 
 // do stuff that happens on start-over button click
 $('#start-over').on('click', () => {
     myGame.reset();
     myGame = new Game('Alternating', 'audio/01-SpyHunter-A8-SpyHunterTheme.ogg', 'images/spy-hunter_title_dos.png');
+    $('#pause').click();
+    $('#start').click();
 });
 
 $(document).on('keydown', (e) => {
-  console.log(e);
-  //myGame.activePlayer.move(myGame.ctx, e.key, myGame.gridSize);
-  if(['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'].includes(e.key)) {
-    myGame.activePlayer.setDirection(e.key);
-  }
+  //console.log(e);
+  if(myGame.activePlayer) {
+    //myGame.activePlayer.move(myGame.ctx, e.key, myGame.gridSize);
+    if(['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'].includes(e.key)) {
+      myGame.activePlayer.setDirection(e.key);
+    }
 
-  // so that we can restart animation 
-  if(e.key === "1") {
-    if(!animationRunning) animate();
-    else console.log("nope");
-  }
-  if(e.key === "2") {
-    stopAnimation();
+    // so that we can restart animation 
+    if(e.key === "1") {
+      if(!animationRunning) animate();
+      else console.log("nope");
+    }
+    if(e.key === "2") {
+      stopAnimation();
+    }
   }
 });
 
 $(document).on('keyup', (e) => {
-  console.log(e);
-  if(['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'].includes(e.key)) {
-    myGame.activePlayer.unsetDirection(e.key);
+  //console.log(e);
+  if(myGame.activePlayer) {
+    if(['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'].includes(e.key)) {
+      myGame.activePlayer.unsetDirection(e.key);
+    }
+    
+    if ([' '].includes(e.key)) {
+      myGame.activePlayer.attack('gun');
+      //console.log(e.key);
+    }
+
+    if (['c'].includes(e.key)) {
+      myGame.activePlayer.attack('missile');
+      //console.log(e.key);
+    }
+
+    if (['x'].includes(e.key)) {
+      myGame.activePlayer.attack('oil');
+      //console.log(e.key);
+    }
   }
 });
 

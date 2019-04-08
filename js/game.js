@@ -4,6 +4,9 @@
 
 class Game {
   constructor(type, bgTrack, bgImage) {
+    this.bgTrack = bgTrack;
+    this.bgAudio = new Audio(bgTrack);
+    this.bgImage = bgImage;
     this.level = 1;
     this.seconds = 0;
     this.minutes = 0;
@@ -14,9 +17,6 @@ class Game {
     this.message = '';
     this.$commsBar = $('.game-comms').children('h1').eq(0);
     this.type = type; //Alternating or Co-op
-    this.bgTrack = bgTrack;
-    this.bgAudio = new Audio(bgTrack);
-    this.bgImage = bgImage;
     this.$gameCanvas = $('#game-canvas');
     this.gridSize = 25;
     this.ctx = this.$gameCanvas[0].getContext('2d');
@@ -35,6 +35,11 @@ class Game {
     this.xFrame = 0;
   }
 
+  printSomething() {
+    console.log(this.message);
+    $(this.$commsBar).text(this.message);
+  };
+
   initializePlayers() {
     this.playerOne = new Player ('Player 1', 'images/Spy_Car_1.png');
     this.playerTwo = new Player ('Player 2', 'images/Spy_Car_2.png');
@@ -52,22 +57,25 @@ class Game {
     // create left road shoulder obstacle
     const leftShoulderTile = new Obstacle ('shoulder', 'shoulder_terrain.png', 0, 0, 100, 600, 'rgb(0, 255, 255)')
     this.leftShoulderArray.push(leftShoulderTile);
+    this.obstacleArray.push(leftShoulderTile);
 
     // create right road shoulder obstacle
     const rightShoulderTile = new Obstacle ('shoulder', 'shoulder_terrain.png', 500, 0, 100, 600, 'rgb(0, 255, 255)')
     this.rightShoulderArray.push(rightShoulderTile);
+    this.obstacleArray.push(rightShoulderTile);
 
-    // create initial enemy
+    // create initial pothole obstacle
     const firstObstacle = new Obstacle ('pothole', 'pothole_icon_1.png', 225, 225, 25, 25, 'green');
     this.obstacleArray.push(firstObstacle);
 
     // create initial enemy
     const firstEnemy = new Enemy ('baddie1', 'regular', 'baddie_icon_1.png');
-    this.enemyArray.push(firstEnemy);
+    this.enemyArray.push(firstEnemy);     
 
     // create initial civilian obstacle
     const firstCivilian = new CivilianCar ('civvie1', 'regular', 'civvie_icon_1.png');
     this.civilianArray.push(firstCivilian);
+    this.obstacleArray.push(firstCivilian);
 
     // create spy car box
     //this.playersArray[0];
@@ -121,8 +129,9 @@ class Game {
     return this;
   }
 
-    reset() {
-    $(this.$commsBar).text(`You started over. The fate of the world is in your hands, good luck!`);
+  reset() {
+    this.message = '`You started over. The fate of the world is in your hands, good luck!';
+    this.printSomething(this.message);
     clearInterval(this.timePassing);
     this.initializePlayers();
     this.activePlayer = this.playerOne;
@@ -149,6 +158,7 @@ class Game {
     this.xFrame = 0;
     this.requestID = null;
     this.animationRunningFlag = false;
+    this.showStartupMsgFlag = true;
     this.start();
     return this;
   }

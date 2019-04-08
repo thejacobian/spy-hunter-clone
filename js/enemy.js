@@ -9,11 +9,10 @@ class Enemy {
     this.type =type;
     this.icon = icon;
     this.points = 500;
-    this.hitpoints = 5;
+    this.hitpoints = 50;
     this.speed = 2;
     this.weaponsArr = [];
     this.actionsArr = [];
-    this.$locationArr = '';
     this.message = '';
 
     // canvas render properties
@@ -28,12 +27,51 @@ class Enemy {
 
   // canvas draw method
   draw(ctx) {
-    makeRectangle(ctx, this.x, this.y, this.width, this.height, this.color, this.color, 1)
+    makeRectangle(ctx, this.x, this.y, this.width, this.height, 'none', this.color, 1)
   }
   
-  move(direction, velocity) {
-    // do movement here
+  setDirection() {
+    // pressing a key means we should be moving in that direction
+    // remember -- move will be called every 1/60th of a second regardless
+    if(myGame.activePlayer.y < this.y) this.direction.up = true;
+    if(myGame.activePlayer.x < this.x) this.direction.left = true;
+    if(myGame.activePlayer.y > this.y) this.direction.down = true;
+    if(myGame.activePlayer.x > this.x) this.direction.right = true;
+  }
+
+  unsetDirection(key) {
+    // releasing a key means we should no longer be moving in that direction
+    // remember -- move will be called every 1/60th of a second regardless
+    // remember -- move will be called every 1/60th of a second regardless
+    // if(key === "ArrowUp") this.direction.up = false;
+    // if(key === "ArrowLeft") this.direction.left = false;
+    // if(key === "ArrowDown") this.direction.down = false;
+    // if(key === "ArrowRight") this.direction.right = false;
+  }
+
+  move(ctx) {
+    // clear it first, then move it.
+    renderCanvas(ctx); //, this.x, this.y, this.width, this.height);
+    // move it if it should be moving
+    // remember -- this will be called every 1/60th of a second 
+    if(this.direction.up && this.y > 5) this.y -= this.speed;
+    if(this.direction.right && this.x < (ctx.canvas.width  - this.width - 5)) this.x += this.speed;
+    if(this.direction.down && this.y < (ctx.canvas.height - this.height - 5)) this.y += this.speed;
+    if(this.direction.left && this.x > 5) this.x -= this.speed;
     return this;
+  }
+
+  checkCollision(thing) {
+    if(
+      this.x + this.width > thing.x &&
+      this.x < thing.x + thing.width &&
+      thing.y < this.y + this.height && 
+      thing.y + thing.height > this.y
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   attack(weapon, damage) {
@@ -47,19 +85,19 @@ class TireSlasher extends Enemy {
   constructor(name, type, icon) {
     super(name, 'tireslasher', icon);
     this.points = 1000;
-    this.hitpoints = 10;
+    this.hitpoints = 100;
     this.speed = 4;
   }
 
-  move(direction, velocity) {
-    // custom movement behavior
-    return this;
-  }
+  // move(direction, velocity) {
+  //   // custom movement behavior
+  //   return this;
+  // }
 
-  attack(weapon, damage) {
-    // custom attack behavior.
-    return this;
-  }
+  // attack(weapon, damage) {
+  //   // custom attack behavior.
+  //   return this;
+  // }
 }
 
 // Extended Bulletproof Bully class that must be run off the road.
@@ -71,34 +109,34 @@ class BulletproofBully extends Enemy {
     this.speed = 3;
   }
 
-  move(direction, velocity) {
-    // custom movement behavior
-    return this;
-  }
+  // move(direction, velocity) {
+  //   // custom movement behavior
+  //   return this;
+  // }
 
-  attack(weapon, damage) {
-    // custom attack behavior.
-    return this;
-  }
+  // attack(weapon, damage) {
+  //   // custom attack behavior.
+  //   return this;
+  // }
 }
 
 class DoubleBarrelAction extends Enemy {
   constructor(name, type, icon) {
     super(name, 'doublebarrel', icon);
     this.points = 2000;
-    this.hitpoints = 25;
+    this.hitpoints = 250;
     this.speed = 2;
   }
 
-  move(direction, velocity) {
-    // custom movement behavior
-    return this;
-  }
+  // move(direction, velocity) {
+  //   // custom movement behavior
+  //   return this;
+  // }
 
-  attack(weapon, damage) {
-    // custom attack behavior.
-    return this;
-  }
+  // attack(weapon, damage) {
+  //   // custom attack behavior.
+  //   return this;
+  // }
 }
 
 class MasterOfTheSkies extends Enemy {
@@ -109,13 +147,13 @@ class MasterOfTheSkies extends Enemy {
     this.speed = 5;
   }
 
-  move(direction, velocity) {
-    // custom movement behavior
-    return this;
-  }
+  // move(direction, velocity) {
+  //   // custom movement behavior
+  //   return this;
+  // }
 
-  attack(weapon, damage) {
-    // custom attack behavior.
-    return this;
-  }
+  // attack(weapon, damage) {
+  //   // custom attack behavior.
+  //   return this;
+  // }
 }

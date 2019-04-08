@@ -15,8 +15,10 @@ class Player {
     this.oils = 10;
     this.speed = 5;
     this.weaponsArr = [];
-    this.actionsArr = [];
-    this.$Location = '';
+    this.shootGunArr = [];
+    this.fireMissileArr = [];
+    this.dropOilArr = [];
+    //this.actionsArr = [];
     this.message = '';
     this.justDamagedFlag = false;
 
@@ -38,7 +40,7 @@ class Player {
 
   // canvas draw method
   draw(ctx) {
-    makeRectangle(ctx, this.x, this.y, this.width, this.height, this.color, this.color, 1)
+    makeRectangle(ctx, this.x, this.y, this.width, this.height, 'none', this.color, 1)
   }
 
   setDirection(key) {
@@ -85,7 +87,24 @@ class Player {
     }
   }
 
-  attack(weapon, damage) {
+  attack(weapon) {
+    let myWeapon;
+    if (weapon === 'gun') {
+      myWeapon = new Weapon('gun', 'images/Gun_1.png')
+      this.shootGunArr.push(myWeapon);
+    } else if (weapon === 'missile') {
+      myWeapon = new Missile('missile', 'images/Missile_1.png')
+      this.fireMissileArr.push(myWeapon);
+      this.missiles--;
+      $('.missile-meter').text(this.missiles);
+    } else if (weapon === 'oil') {
+      myWeapon = new OilSlick('oil', 'images/Oil_1.png')
+      this.dropOilArr.push(myWeapon);
+      this.oils--;
+      $('.oil-meter').text(this.oils);
+    }
+    this.weaponsArr.push(myWeapon);
+    //myWeapon.move(myGame.ctx);
     return this;
   }
 
