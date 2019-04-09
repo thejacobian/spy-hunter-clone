@@ -13,13 +13,15 @@ class Player {
     this.lives = 3;
     this.missiles = 10;
     this.oils = 10;
-    this.speed = 5;
-    this.weaponsArr = [];
-    this.shootGunArr = [];
-    this.fireMissileArr = [];
-    this.dropOilArr = [];
+    this.speed = 6;
+    this.collisionDamage = 25;
+    this.weaponsArray = [];
+    this.shootGunArray = [];
+    this.fireMissileArray = [];
+    this.dropOilArray = [];
     //this.actionsArr = [];
     this.message = '';
+    this.colDir = false;
     this.justDamagedFlag = false;
 
     // canvas render properties
@@ -74,36 +76,72 @@ class Player {
     return this;
   }
 
-  checkCollision(thing) {
-    if(
-      this.x + this.width > thing.x &&
-      this.x < thing.x + thing.width &&
-      thing.y < this.y + this.height && 
-      thing.y + thing.height > this.y
-    ) {
-      return true;
-    } else {
-      return false;
+  // checkCollision(thing) {
+  //   if(
+  //     this.x + this.width > thing.x &&
+  //     this.x < thing.x + thing.width &&
+  //     thing.y < this.y + this.height && 
+  //     thing.y + thing.height > this.y
+  //   ) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
+
+  // Modified collision check returning direction from internet canvas platformer tutorial URL below
+  // http://www.somethinghitme.com/2013/04/16/creating-a-canvas-platformer-tutorial-part-tw/
+  colCheck(thing) {
+    // get the vectors to check against
+    const vX = (this.x + (this.width / 2)) - (thing.x + (thing.width / 2)),
+      vY = (this.y + (this.height / 2)) - (thing.y + (thing.height / 2)),
+      // add the half widths and half heights of the objects
+      hWidths = (this.width / 2) + (thing.width / 2),
+      hHeights = (this.height / 2) + (thing.height / 2);
+      
+    this.colDir = false;
+ 
+    // if the x and y vector are less than the half width or half height, they we must be inside the object, causing a collision
+    if (Math.abs(vX) < hWidths && Math.abs(vY) < hHeights) {  // figures out on which side we are colliding (top, bottom, left, or right)
+      let oX = hWidths - Math.abs(vX), oY = hHeights - Math.abs(vY);
+      if (oX >= oY) {
+        if (vY > 0) {
+          this.colDir = "t";
+          this.y += oY;
+        } else {
+          this.colDir = "b";
+          this.y -= oY;
+        }
+      } else {
+        if (vX > 0) {
+          this.colDir = "l";
+          this.x += oX;
+        } else {
+          this.colDir = "r";
+          this.x -= oX;
+        }
+      }
     }
-  }
+    return this.colDir;
+  };
 
   attack(weapon) {
     let myWeapon;
     if (weapon === 'gun') {
-      myWeapon = new Weapon('gun', 'images/Gun_1.png')
-      this.shootGunArr.push(myWeapon);
+      myWeapon = new Weapon('gun', 'images/Gun_1.png');
+      this.shootGunArray.push(myWeapon);
     } else if (weapon === 'missile') {
-      myWeapon = new Missile('missile', 'images/Missile_1.png')
-      this.fireMissileArr.push(myWeapon);
-      this.missiles--;
-      $('.missile-meter').text(this.missiles);
+        myWeapon = new Missile('missile', 'images/Missile_1.png');
+        this.fireMissileArray.push(myWeapon);
+        this.missiles--;
+        $('.missile-meter').text(this.missiles);
     } else if (weapon === 'oil') {
-      myWeapon = new OilSlick('oil', 'images/Oil_1.png')
-      this.dropOilArr.push(myWeapon);
-      this.oils--;
-      $('.oil-meter').text(this.oils);
+        myWeapon = new OilSlick('oil', 'images/Oil_1.png');
+        this.dropOilArray.push(myWeapon);
+        this.oils--;
+        $('.oil-meter').text(this.oils);
     }
-    this.weaponsArr.push(myWeapon);
+    this.weaponsArray.push(myWeapon);
     //myWeapon.move(myGame.ctx);
     return this;
   }

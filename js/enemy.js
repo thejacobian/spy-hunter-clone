@@ -4,16 +4,17 @@
 
 // Basic Enemy Car Class that can be shot or run off the road for points.
 class Enemy {
-  constructor(name, type, icon) {
-    this.name = name;
+  constructor(type, icon) {
     this.type =type;
     this.icon = icon;
     this.points = 500;
-    this.hitpoints = 50;
+    this.hitpoints = 49;
     this.speed = 2;
+    this.damage = 20;
     this.weaponsArr = [];
     this.actionsArr = [];
     this.message = '';
+    this.alive = true;
 
     // canvas render properties
     this.xInit = 250;
@@ -23,6 +24,12 @@ class Enemy {
     this.width = 25;
     this.height = 50;
     this.color = 'blue';
+    this.direction = {
+      up: false,
+      right: false,
+      down: false,
+      left: false,
+    };
   }
 
   // canvas draw method
@@ -31,15 +38,26 @@ class Enemy {
   }
   
   setDirection() {
-    // pressing a key means we should be moving in that direction
-    // remember -- move will be called every 1/60th of a second regardless
-    if(myGame.activePlayer.y < this.y) this.direction.up = true;
-    if(myGame.activePlayer.x < this.x) this.direction.left = true;
-    if(myGame.activePlayer.y > this.y) this.direction.down = true;
-    if(myGame.activePlayer.x > this.x) this.direction.right = true;
+    // set vertical movement direction for enemy
+    if(myGame.activePlayer.y < this.y) {
+      this.direction.up = true;
+      this.direction.down = false;
+    } else if(myGame.activePlayer.y > this.y) {
+      this.direction.up = false;
+      this.direction.down = true;
+    }
+
+   // set horizontal movement direction for enemy
+    if(myGame.activePlayer.x < this.x) {
+      this.direction.left = true;
+      this.direction.right = false;
+    } else if(myGame.activePlayer.x > this.x) {
+      this.direction.left = false;
+      this.direction.right = true;
+    }
   }
 
-  unsetDirection(key) {
+  unsetDirection() {
     // releasing a key means we should no longer be moving in that direction
     // remember -- move will be called every 1/60th of a second regardless
     // remember -- move will be called every 1/60th of a second regardless
@@ -54,6 +72,7 @@ class Enemy {
     renderCanvas(ctx); //, this.x, this.y, this.width, this.height);
     // move it if it should be moving
     // remember -- this will be called every 1/60th of a second 
+    this.y += 1;
     if(this.direction.up && this.y > 5) this.y -= this.speed;
     if(this.direction.right && this.x < (ctx.canvas.width  - this.width - 5)) this.x += this.speed;
     if(this.direction.down && this.y < (ctx.canvas.height - this.height - 5)) this.y += this.speed;
@@ -82,11 +101,12 @@ class Enemy {
 
 // Extended tire slasher car class that must be shot.
 class TireSlasher extends Enemy {
-  constructor(name, type, icon) {
-    super(name, 'tireslasher', icon);
+  constructor(type, icon) {
+    super('tireslasher', icon);
     this.points = 1000;
     this.hitpoints = 100;
     this.speed = 4;
+    this.damage = 100;
   }
 
   // move(direction, velocity) {
@@ -102,11 +122,12 @@ class TireSlasher extends Enemy {
 
 // Extended Bulletproof Bully class that must be run off the road.
 class BulletproofBully extends Enemy {
-  constructor(name, type, icon) {
-    super(name, 'bulletproof', icon);
+  constructor(type, icon) {
+    super('bulletproof', icon);
     this.points = 1500;
     this.hitpoints = 100000000;
     this.speed = 3;
+    this.damage = 20;
   }
 
   // move(direction, velocity) {
@@ -121,11 +142,12 @@ class BulletproofBully extends Enemy {
 }
 
 class DoubleBarrelAction extends Enemy {
-  constructor(name, type, icon) {
-    super(name, 'doublebarrel', icon);
+  constructor(type, icon) {
+    super('doublebarrel', icon);
     this.points = 2000;
     this.hitpoints = 250;
     this.speed = 2;
+    this.damage = 50;
   }
 
   // move(direction, velocity) {
@@ -140,11 +162,12 @@ class DoubleBarrelAction extends Enemy {
 }
 
 class MasterOfTheSkies extends Enemy {
-  constructor(name, type, icon) {
-    super(name, 'master', icon);
+  constructor(type, icon) {
+    super('master', icon);
     this.points = 2500;
     this.hitpoints = 50;
     this.speed = 5;
+    this.damage = 100;
   }
 
   // move(direction, velocity) {

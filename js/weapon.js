@@ -9,6 +9,7 @@ class Weapon {
     this.icon = icon;
     this.damage = 25;
     this.speed = 10;
+    this.alive = true;
 
     // canvas render properties
     this.x = myGame.activePlayer.x + 11; // start bullets in front of car
@@ -31,6 +32,19 @@ class Weapon {
     this.y -= this.speed;
     return this;
   }
+
+  checkCollision(thing) {
+    if(
+      this.x + this.width > thing.x &&
+      this.x < thing.x + thing.width &&
+      thing.y < this.y + this.height && 
+      thing.y + thing.height > this.y
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 // Extended  weapon to implement missile
@@ -39,7 +53,7 @@ class Missile extends Weapon {
     super('missile', icon);
     this.color = 'purple';
     this.damage = 200;
-    this.speed = 20;
+    this.speed = 18;
 
     // canvas render properties
     this.x = myGame.activePlayer.x + 9; // start bullets in front of car
@@ -55,7 +69,7 @@ class OilSlick extends Weapon {
     super('oil slick', icon);
     this.color = 'gray';
     this.damage = 75;
-    this.speed = -10;
+    this.speed = -1;
 
     // canvas render properties
     this.x = myGame.activePlayer.x + 2; // start bullets in front of car

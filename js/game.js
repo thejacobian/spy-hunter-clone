@@ -32,6 +32,8 @@ class Game {
     this.activePlayer;
     this.requestID;
     this.animationRunningFlag = false;
+    this.animationRunningCtr= 0;
+    this.animationRunningCtrFlag = false;
     this.xFrame = 0;
   }
 
@@ -69,11 +71,11 @@ class Game {
     this.obstacleArray.push(firstObstacle);
 
     // create initial enemy
-    const firstEnemy = new Enemy ('baddie1', 'regular', 'baddie_icon_1.png');
+    const firstEnemy = new Enemy ('basic badguy', 'baddie_icon_1.png');
     this.enemyArray.push(firstEnemy);     
 
     // create initial civilian obstacle
-    const firstCivilian = new CivilianCar ('civvie1', 'regular', 'civvie_icon_1.png');
+    const firstCivilian = new CivilianCar ('civilian car', 'civvie_icon_1.png');
     this.civilianArray.push(firstCivilian);
     this.obstacleArray.push(firstCivilian);
 

@@ -34,8 +34,8 @@ const secondsGoUp = () => {
     $('.lives-meter').css('color', 'red');
   }
 
-  // handle game state transition for things that happen at 0 min 10 seconds
-  if (myGame.minutes === 0 && myGame.seconds === 10) {
+  // handle game state transition for things that happen at 0 min 5 seconds
+  if (myGame.minutes === 0 && myGame.seconds === 5) {
     //disable unlimited retry "training" mode and start losing lives
     myGame.stillTrainingFlag = false;
   }
@@ -105,13 +105,59 @@ const animate = () => {
   myGame.xFrame++; // will allow us to access how many frames
   myGame.animationRunningFlag = true; // this is a flag -- we will use it to prevent running animation more than once
 
-  myGame.activePlayer.move(myGame.ctx);
-  //clearCanvas(this.ctx); // prevent trailers!
-  //myGame.activePlayer.draw(myGame.ctx); // that's better
+  // move all players on the screen
+  myGame.playersArray.forEach(function(player) {
+    player.move(myGame.ctx);
+  });
+  
+  // move all enemies on screen
+  myGame.enemyArray.forEach(function(enemy) {
+    enemy.setDirection();
+    enemy.move(myGame.ctx);
+  });
 
-  //move and draw all weapons on screen
-  myGame.activePlayer.weaponsArr.forEach(function(weapon) {
+  // move all obstacles on screen
+  myGame.obstacleArray.forEach(function(obstacle) {
+    obstacle.move(myGame.ctx);
+  });
+
+  //move and draw all weapon projectiles on screen
+  myGame.activePlayer.weaponsArray.forEach(function(weapon) {
+    
+    // move the weapon projectile across the screen
     weapon.move(myGame.ctx);
+
+    //check if weapon still has property alive and can do damage
+    if (weapon.alive) {
+      // check for projectile collision with enemy
+      myGame.enemyArray.forEach(function(enemy) {
+        if (weapon.checkCollision(enemy)) {
+          myGame.message = `${weapon.type} has hit ${enemy.type} for ${weapon.damage}!`
+          myGame.printSomething(myGame.message);
+          enemy.hitpoints -= weapon.damage;
+          if (enemy.hitpoints < 0) {
+            myGame.activePlayer.score += enemy.points;
+            enemy.alive = false;
+          }
+          weapon.alive = false;
+        }
+      });
+      // check for projectile collision with obstacle (civilian)
+      myGame.obstacleArray.forEach(function(obstacle) {
+        if (weapon.checkCollision(obstacle)) {
+            if (obstacle.type.includes('civilian')) {
+              myGame.message = `${weapon.type} has hit ${obstacle.type} for ${weapon.damage}!`
+              myGame.printSomething(myGame.message);
+              obstacle.hitpoints -= weapon.damage;
+              if (obstacle.hitpoints < 0) {
+                myGame.activePlayer.score -= obstacle.points;
+                obstacle.alive = false;
+              }
+              weapon.alive = false;
+            }
+          }
+        });
+      } 
   });
 
   // check for collision with obstacles
@@ -128,6 +174,58 @@ const animate = () => {
     }
   });
 
+  // check for collision with enemies
+  myGame.enemyArray.forEach(function(enemy) {
+    if (myGame.activePlayer.colCheck(enemy)) {
+      if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
+        myGame.printSomething(`Collision with ${enemy.type} from ${myGame.activePlayer.colDir}!`);
+        myGame.activePlayer.score -= enemy.damage;
+        $('.score-meter').text(myGame.activePlayer.score);
+        myGame.activePlayer.hitpoints -= enemy.damage;
+        enemy.hitpoints -= myGame.activePlayer.collisionDamage;
+        myGame.activePlayer.justDamagedFlag = true;
+
+        // handle collision bounce direction
+        if (myGame.activePlayer.colDir === 't') {
+          myGame.activePlayer.y += 100;
+          enemy.y -= 125;
+        } else if (myGame.activePlayer.colDir === 'r') {
+          myGame.activePlayer.x -= 100;
+          enemy.x += 125;
+        } else if (myGame.activePlayer.colDir === 'b') {
+          myGame.activePlayer.y -= 100;
+          enemy.y += 125;
+        } else if (myGame.activePlayer.colDir === 'l') {
+          myGame.activePlayer.x += 100;
+          enemy.x -= 125;
+        }
+
+        setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 500);
+      }
+      // set enemy's dead flag if hp below 0
+      if (enemy.hitpoints < 0) {
+        myGame.activePlayer.score += enemy.points;
+        enemy.alive = false;
+      }
+    }
+  });
+
+  // remove dead enemies
+  myGame.enemyArray = myGame.enemyArray.filter(function(enemy) {
+    return enemy.alive === true;
+  });
+
+  // remove dead civilians
+  myGame.obstacleArray = myGame.obstacleArray.filter(function(obstacle) {
+    return obstacle.alive === true;
+  });
+
+  // remove dead weapon projectiles
+  myGame.activePlayer.weaponsArray = myGame.activePlayer.weaponsArray.filter(function(weapon) {
+    return weapon.alive === true;
+  });
+
+  // if player's hitpoints reach 0 remove a life
   if (myGame.activePlayer.hitpoints < 1) {
     myGame.activePlayer.lives--;
     $('.lives-meter').text(myGame.activePlayer.lives);
@@ -136,6 +234,7 @@ const animate = () => {
     myGame.printSomething(myGame.message);
   }
 
+  // if player's lives reach 0, stop animationFrame
   if (myGame.activePlayer.lives > 0) {
     // recursion -- you are creating a situation where the function calls itself 
     myGame.requestID = window.requestAnimationFrame(animate);
@@ -188,9 +287,23 @@ $(document).on('keydown', (e) => {
       myGame.activePlayer.setDirection(e.key);
     }
 
+    // if player presses Up Key we speed up background
+    if (['ArrowUp'].includes(e.key)) {
+      // if (myGame.animationRunningFlag) {
+      //   animate();
+      // }
+    }
+
+    // if player presses Down Key we slow background
+    if (['ArrowDown'].includes(e.key)) {
+      // if (myGame.animationRunningFlag) {
+      //   stopAnimation();
+      // }
+    }
+
     // so that we can restart animation 
     if(e.key === "1") {
-      if(!animationRunning) animate();
+      if(!myGame.animationRunningFlag) animate();
       else console.log("nope");
     }
     if(e.key === "2") {
@@ -206,19 +319,23 @@ $(document).on('keyup', (e) => {
       myGame.activePlayer.unsetDirection(e.key);
     }
     
+    // handle spacebar key release to shoot machine gun
     if ([' '].includes(e.key)) {
       myGame.activePlayer.attack('gun');
-      //console.log(e.key);
     }
 
+    // handle c key release to fire missile
     if (['c'].includes(e.key)) {
-      myGame.activePlayer.attack('missile');
-      //console.log(e.key);
+      if (myGame.activePlayer.missiles > 0) {
+        myGame.activePlayer.attack('missile');
+      }
     }
 
+    // handle x key release to drop oil slick
     if (['x'].includes(e.key)) {
-      myGame.activePlayer.attack('oil');
-      //console.log(e.key);
+      if (myGame.activePlayer.oils > 0) {
+        myGame.activePlayer.attack('oil');
+      }
     }
   }
 });

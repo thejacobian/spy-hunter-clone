@@ -20,7 +20,7 @@ const renderCanvas = (ctx) => {
       obstacle.draw(ctx);
     });
 
-    // draw enemies
+    // draw enemies on screen
     myGame.enemyArray.forEach(function(enemy) {
       enemy.draw(ctx);
     });
@@ -30,25 +30,25 @@ const renderCanvas = (ctx) => {
     //   civilian.draw(ctx);
     // });
 
-    // draw spy car box
+    // draw the spy car players on screen
     myGame.playersArray.forEach(function(player) {
       player.draw(ctx);
     });
 
     // draw the gun bullets on screen
-    myGame.activePlayer.shootGunArr.forEach(function(bullet) {
-      bullet.draw(ctx);
+    myGame.activePlayer.weaponsArray.forEach(function(projectile) {
+      projectile.draw(ctx);
     });
 
-    // draw the missiles on screen
-    myGame.activePlayer.fireMissileArr.forEach(function(missile) {
-      missile.draw(ctx);
-    });
+    // // draw the missiles on screen
+    // myGame.activePlayer.fireMissileArray.forEach(function(missile) {
+    //   missile.draw(ctx);
+    // });
 
-    // draw the oils on screen
-    myGame.activePlayer.dropOilArr.forEach(function(oil) {
-      oil.draw(ctx);
-    });
+    // // draw the oils on screen
+    // myGame.activePlayer.dropOilArray.forEach(function(oil) {
+    //   oil.draw(ctx);
+    // });
 
     // // draw a circle
     // makeCircle(this.ctx, 75, 325, 71, 0, Math.PI * 2, 'orange', 2);
