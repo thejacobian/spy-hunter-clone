@@ -34,10 +34,27 @@ const secondsGoUp = () => {
     $('.lives-meter').css('color', 'red');
   }
 
+  // do stuff every 10 seconds like adding a new set of road shoulders
+  // myGame.dropEntitySpeedAdjust = Math.round(10 / myGame.playerSpeedAdjust);
+  // if (myGame.seconds !== 0 && myGame.seconds % myGame.dropEntitySpeedAdjust === 0) {
+  //   myGame.newShoulderTiles(); //populate a new set of Shoulder tiles before we reach them.
+  // }
+
   // handle game state transition for things that happen at 0 min 1 seconds
   if (myGame.minutes === 0 && myGame.seconds === 1) {
     //disable unlimited retry "training" mode and start losing lives
     myGame.stillTrainingFlag = false;
+
+    // if(enemy.type === "basic"){
+    //   this.enemyClass = Enemy;
+    // } else if (enemy.type === "tireslasher"){
+    //   this.enemyClass = TireSlasher;
+    // } else if (options.type === "bulletproof bully"){
+    //   this.enemyClass = BulletproofBully;
+    // } else if (options.type === "doublebarrel action"){
+    //   this.enemyClass = DoubleBarrelAction;
+    // } else { // must be "master of the skies"
+    //   this.enemyClass = MasterOfTheSkies
   }
 
   // handle game state transition for things that happen at 3 mins
@@ -100,150 +117,227 @@ const stopAnimation = () => {
   myGame.animationRunningFlag = false;
 };
 
+function startAnimation() {
+    myGame.fpsInterval = 1000 / myGame.fps;
+    myGame.then = Date.now();
+    myGame.startTime = myGame.then;
+    animate();
+}
+
 const animate = () => {
-  // code in here will be repeated 60 times/sec (approx)
-  myGame.xFrame++; // will allow us to access how many frames
-  myGame.animationRunningFlag = true; // this is a flag -- we will use it to prevent running animation more than once
-
-  // move all players on the screen
-  myGame.playersArray.forEach(function(player) {
-    player.move(myGame.ctx);
-  });
-  
-  // move all enemies on screen
-  myGame.enemyArray.forEach(function(enemy) {
-    enemy.setDirection();
-    enemy.move(myGame.ctx);
-  });
-
-  // move all obstacles on screen
-  myGame.obstacleArray.forEach(function(obstacle) {
-    obstacle.move(myGame.ctx);
-  });
-
-  //move and draw all weapon projectiles on screen
-  myGame.activePlayer.weaponsArray.forEach(function(weapon) {
+  // if player's lives reach 0, stop animationFrame
+  if (myGame.activePlayer.lives > 0) {
+    // recursion -- you are creating a situation where the function calls itself 
     
-    // move the weapon projectile across the screen
-    weapon.move(myGame.ctx);
+    // request another frame
+    myGame.requestID = requestAnimationFrame(animate);
 
-    //check if weapon still has property alive and can do damage
-    if (weapon.alive) {
-      // check for projectile collision with enemy
+    // calc elapsed time since last loop
+    myGame.now = Date.now();
+    myGame.elapsed = myGame.now - myGame.then;
+
+    // if enough time has elapsed, draw the next frame
+    if (myGame.elapsed > myGame.fpsInterval) {
+      // Get ready for next frame by setting then=now, but also adjust for your
+      // specified fpsInterval not being a multiple of RAF's interval (16.7ms)
+      myGame.then = myGame.now - (myGame.elapsed % myGame.fpsInterval);
+
+      // Put your drawing code here
+      // code in here will be repeated 60 times/sec (approx)
+      myGame.xFrame++; // will allow us to access how many frames
+      myGame.animationRunningFlag = true; // this is a flag -- we will use it to prevent running animation more than once
+
+      // move all players on the screen
+      myGame.playersArray.forEach(function(player) {
+        player.move(myGame.ctx);
+      });
+      
+      // move all enemies on screen
       myGame.enemyArray.forEach(function(enemy) {
-        if (weapon.checkCollision(enemy)) {
-          myGame.message = `${weapon.type} has hit ${enemy.type} for ${weapon.damage}!`
-          myGame.printSomething(myGame.message);
-          enemy.hitpoints -= weapon.damage;
+        // flag for removal any enemies no longer on the scren
+        if (enemy.y > myGame.ctx.canvas.height) {
+          enemy.alive = false;
+        } else {
+          enemy.setDirection();
+          enemy.move(myGame.ctx);
+        }
+      });
+
+      // move all potholes on screen
+      myGame.potholeArray.forEach(function(pothole) {
+        // flag for removal any obstacles no longer on the screen
+        if (pothole.y > myGame.ctx.canvas.height) {
+          pothole.alive = false;
+        } else {
+          // otherwise move the obstacle
+          pothole.move(myGame.ctx);
+        }
+      });
+
+      // move all left shoulders on screen
+      myGame.leftShoulderArray.forEach(function(leftShoulder) {
+        // flag for removal any obstacles no longer on the screen
+        if (leftShoulder.y > myGame.ctx.canvas.height) {
+          leftShoulder.alive = false;
+        } else {
+          // otherwise move the obstacle
+          leftShoulder.move(myGame.ctx);
+        }
+      });
+
+      // move all right shoulders on screen
+      myGame.rightShoulderArray.forEach(function(rightShoulder) {
+        // flag for removal any obstacles no longer on the screen
+        if (rightShoulder.y > myGame.ctx.canvas.height) {
+          rightShoulder.alive = false;
+        } else {
+          // otherwise move the obstacle
+          rightShoulder.move(myGame.ctx);
+        }
+      });
+
+      // move all civilians on screen
+      myGame.civilianArray.forEach(function(civilian) {
+        // flag for removal any obstacles no longer on the screen
+        if (civilian.y > myGame.ctx.canvas.height) {
+          civilian.alive = false;
+        } else {
+          // otherwise move the obstacle
+          civilian.move(myGame.ctx);
+        }
+      });
+
+      //move and draw all weapon projectiles on screen
+      myGame.activePlayer.weaponsArray.forEach(function(weapon) {
+        // flag for removal any weapons no longer on the screen
+        if (weapon.y < 0) {
+          weapon.alive = false;
+        } else {
+          // otherwise move the obstacle
+          weapon.move(myGame.ctx);
+        }
+        //check if weapon still has property alive and can do damage
+        if (weapon.alive) {
+          // check for projectile collision with enemy
+          myGame.enemyArray.forEach(function(enemy) {
+            if (weapon.checkCollision(enemy)) {
+              myGame.message = `${weapon.type} has hit ${enemy.type} for ${weapon.damage}!`
+              myGame.printSomething(myGame.message);
+              enemy.hitpoints -= weapon.damage;
+              if (enemy.hitpoints < 0) {
+                myGame.activePlayer.score += enemy.points;
+                enemy.alive = false;
+              }
+              weapon.alive = false;
+            }
+          });
+          // check for projectile collision with (civilian)
+          myGame.civilianArray.forEach(function(civilian) {
+            if (weapon.checkCollision(civilian)) {
+              myGame.message = `${weapon.type} has hit ${civilian.type} for ${weapon.damage}!`
+              myGame.printSomething(myGame.message)
+              civilian.alive = false;
+              weapon.alive = false;
+            }  
+          });
+        }
+      });
+
+      // check for collision with obstacles
+      myGame.obstacleArray.forEach(function(obstacle) {
+        if (myGame.activePlayer.checkCollision(obstacle)) {
+          if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
+            myGame.printSomething(`Collision with ${obstacle.type}!`);
+            myGame.activePlayer.score -= obstacle.damage;
+            $('.score-meter').text(myGame.activePlayer.score);
+            myGame.activePlayer.hitpoints -= obstacle.damage;
+            obstacle.hitpoints -= myGame.activePlayer.collisionDamage;
+            myGame.activePlayer.justDamagedFlag = true;
+            setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 3000);
+          }
+
+          // set obstacle's/civilian's dead flag if hp below 0
+          if (obstacle.hitpoints < 0) {
+            obstacle.alive = false;
+          }
+        }
+      });
+
+      // check for collision with enemies
+      myGame.enemyArray.forEach(function(enemy) {
+        if (myGame.activePlayer.checkCollisionDirection(enemy)) {
+          if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
+            myGame.printSomething(`Collision with ${enemy.type} from ${myGame.activePlayer.colDir}!`);
+            myGame.activePlayer.score -= enemy.damage;
+            $('.score-meter').text(myGame.activePlayer.score);
+            myGame.activePlayer.hitpoints -= enemy.damage;
+            enemy.hitpoints -= myGame.activePlayer.collisionDamage;
+            myGame.activePlayer.justDamagedFlag = true;
+
+            // handle collision bounce effect
+            if (myGame.activePlayer.colDir === 't') {
+              myGame.activePlayer.y += 100;
+              enemy.y -= 125;
+            } else if (myGame.activePlayer.colDir === 'r') {
+              myGame.activePlayer.x -= 100;
+              enemy.x += 125;
+            } else if (myGame.activePlayer.colDir === 'b') {
+              myGame.activePlayer.y -= 100;
+              enemy.y += 125;
+            } else if (myGame.activePlayer.colDir === 'l') {
+              myGame.activePlayer.x += 100;
+              enemy.x -= 125;
+            }
+
+            setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 500);
+          }
+          // set enemy's dead flag if hp below 0
           if (enemy.hitpoints < 0) {
             myGame.activePlayer.score += enemy.points;
             enemy.alive = false;
           }
-          weapon.alive = false;
         }
       });
-      // check for projectile collision with obstacle (civilian)
-      myGame.obstacleArray.forEach(function(obstacle) {
-        if (weapon.checkCollision(obstacle)) {
-            if (obstacle.type.includes('civilian')) {
-              myGame.message = `${weapon.type} has hit ${obstacle.type} for ${weapon.damage}!`
-              myGame.printSomething(myGame.message);
-              obstacle.hitpoints -= weapon.damage;
-              if (obstacle.hitpoints < 0) {
-                myGame.activePlayer.score -= obstacle.points;
-                obstacle.alive = false;
-              }
-              weapon.alive = false;
-            }
-          }
-        });
-      } 
-  });
 
-  // check for collision with obstacles
-  myGame.obstacleArray.forEach(function(obstacle) {
-    if (myGame.activePlayer.checkCollision(obstacle)) {
-      if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
-        myGame.printSomething(`Collision with ${obstacle.type}!`);
-        myGame.activePlayer.score -= obstacle.damage;
-        $('.score-meter').text(myGame.activePlayer.score);
-        myGame.activePlayer.hitpoints -= obstacle.damage;
-        obstacle.hitpoints -= myGame.activePlayer.collisionDamage;
-        myGame.activePlayer.justDamagedFlag = true;
-        setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 3000);
-      }
+      // remove dead enemies
+      myGame.enemyArray = myGame.enemyArray.filter(function(enemy) {
+        return enemy.alive === true;
+      });
 
-      // set obstacle/civilion's dead flag if hp below 0
-      if (obstacle.hitpoints < 0) {
-        obstacle.alive = false;
-      }
-    }
-  });
+      // remove dead civilians
+      myGame.civilianArray = myGame.civilianArray.filter(function(civilian) {
+        return civilian.alive === true;
+      });
 
-  // check for collision with enemies
-  myGame.enemyArray.forEach(function(enemy) {
-    if (myGame.activePlayer.checkCollisionDirection(enemy)) {
-      if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
-        myGame.printSomething(`Collision with ${enemy.type} from ${myGame.activePlayer.colDir}!`);
-        myGame.activePlayer.score -= enemy.damage;
-        $('.score-meter').text(myGame.activePlayer.score);
-        myGame.activePlayer.hitpoints -= enemy.damage;
-        enemy.hitpoints -= myGame.activePlayer.collisionDamage;
-        myGame.activePlayer.justDamagedFlag = true;
+      // remove dead potholes
+      myGame.potholeArray = myGame.potholeArray.filter(function(pothole) {
+        return pothole.alive === true;
+      });
 
-        // handle collision bounce direction
-        if (myGame.activePlayer.colDir === 't') {
-          myGame.activePlayer.y += 100;
-          enemy.y -= 125;
-        } else if (myGame.activePlayer.colDir === 'r') {
-          myGame.activePlayer.x -= 100;
-          enemy.x += 125;
-        } else if (myGame.activePlayer.colDir === 'b') {
-          myGame.activePlayer.y -= 100;
-          enemy.y += 125;
-        } else if (myGame.activePlayer.colDir === 'l') {
-          myGame.activePlayer.x += 100;
-          enemy.x -= 125;
-        }
+      // remove dead left shoulders
+      myGame.leftShoulderArray = myGame.leftShoulderArray.filter(function(leftShoulder) {
+        return leftShoulder.alive === true;
+      });
 
-        setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 500);
-      }
-      // set enemy's dead flag if hp below 0
-      if (enemy.hitpoints < 0) {
-        myGame.activePlayer.score += enemy.points;
-        enemy.alive = false;
+      // remove dead right shoulders
+      myGame.rightShoulderArray = myGame.rightShoulderArray.filter(function(rightShoulder) {
+        return rightShoulder.alive === true;
+      });
+
+      // remove dead weapon projectiles
+      myGame.activePlayer.weaponsArray = myGame.activePlayer.weaponsArray.filter(function(weapon) {
+        return weapon.alive === true;
+      });
+
+      // if player's hitpoints reach 0 remove a life
+      if (myGame.activePlayer.hitpoints < 1) {
+        myGame.activePlayer.lives--;
+        $('.lives-meter').text(myGame.activePlayer.lives);
+        myGame.activePlayer.hitpoints = 100;
+        myGame.message = `You lost a life! Lives remaining: ${myGame.activePlayer.lives}`;
+        myGame.printSomething(myGame.message);
       }
     }
-  });
-
-  // remove dead enemies
-  myGame.enemyArray = myGame.enemyArray.filter(function(enemy) {
-    return enemy.alive === true;
-  });
-
-  // remove dead civilians
-  myGame.obstacleArray = myGame.obstacleArray.filter(function(obstacle) {
-    return obstacle.alive === true;
-  });
-
-  // remove dead weapon projectiles
-  myGame.activePlayer.weaponsArray = myGame.activePlayer.weaponsArray.filter(function(weapon) {
-    return weapon.alive === true;
-  });
-
-  // if player's hitpoints reach 0 remove a life
-  if (myGame.activePlayer.hitpoints < 1) {
-    myGame.activePlayer.lives--;
-    $('.lives-meter').text(myGame.activePlayer.lives);
-    myGame.activePlayer.hitpoints = 100;
-    myGame.message = `You lost a life! Lives remaining: ${myGame.activePlayer.lives}`;
-    myGame.printSomething(myGame.message);
-  }
-
-  // if player's lives reach 0, stop animationFrame
-  if (myGame.activePlayer.lives > 0) {
-    // recursion -- you are creating a situation where the function calls itself 
-    myGame.requestID = window.requestAnimationFrame(animate);
   }
 }
 
@@ -252,7 +346,7 @@ $('#start').on('click', () => {
   myGame.start();
   myGame.timePassing = setInterval(secondsGoUp, 1000);
   myGame.xFrame = 0;
-  animate();
+  startAnimation();
 });
 
 // do stuff that happens on pause button click
@@ -293,20 +387,6 @@ $(document).on('keydown', (e) => {
       myGame.activePlayer.setDirection(e.key);
     }
 
-    // if player presses Up Key we speed up background
-    if (['ArrowUp'].includes(e.key)) {
-      // if (myGame.animationRunningFlag) {
-      //   animate();
-      // }
-    }
-
-    // if player presses Down Key we slow background
-    if (['ArrowDown'].includes(e.key)) {
-      // if (myGame.animationRunningFlag) {
-      //   stopAnimation();
-      // }
-    }
-
     // so that we can restart animation 
     if(e.key === "1") {
       if(!myGame.animationRunningFlag) animate();
@@ -325,6 +405,22 @@ $(document).on('keyup', (e) => {
       myGame.activePlayer.unsetDirection(e.key);
     }
     
+    // if player releases Up Key we speed up background
+    if (['ArrowUp'].includes(e.key)) {
+      if (myGame.animationRunningFlag && myGame.speedUpCtr >= 0 && myGame.speedUpCtr < 3) {
+        myGame.speedUpCtr++;
+        myGame.playerSpeedAdjust = (myGame.playerSpeedAdjust + myGame.speedUpCtr * myGame.speedUpRatio);
+      }
+    }
+
+    // if player presses Down Key we slow background
+    if (['ArrowDown'].includes(e.key)) {
+      if (myGame.animationRunningFlag && myGame.speedUpCtr > 0 && myGame.speedUpCtr <= 3) {
+        myGame.speedUpCtr--;
+        myGame.playerSpeedAdjust = (myGame.playerSpeedAdjust - myGame.speedUpCtr * myGame.speedUpRatio);
+      }
+    }
+
     // handle spacebar key release to shoot machine gun
     if ([' '].includes(e.key)) {
       myGame.activePlayer.attack('gun');
@@ -345,111 +441,3 @@ $(document).on('keyup', (e) => {
     }
   }
 });
-
-// $('window').keydown(function() {
-//   alert( "Handler for .keydown() called." );
-// });
-// /* <div class = "game-square"
-//     x = 0
-//     y = -1 */}
-// // 1) Generate a grid
-
-// // make 10 rows by 10 cols with an x and y attribute
-// function generateBoardSquares = () => {
-//   for (let y = 9; y >= 00; y--) {
-//     console.log('Making Row' + y)
-//     $('#gameboard').append(`<div class='row' row=${y} ></div>`)
-//     for(let x = 9; x >= 00; x--) {
-//       console.log('Making Col' + x)
-//       $('#gameboard').append(`<div class='row' row=${x} ></div>`)
-
-//       // make a square with the right coordinates
-//       const $gameSquare = $(`<div class='game-square' x=${x} y=${y}`)
-      
-//       // add the square to the current row
-//       $('div[row="${y}"]').append('gameSquare');
-//     }
-//   }
-// };
-
-// generateBoardSquares();
-
-// class Laser {
-//   constructor(x) {
-//     this.x = x;
-//     this.y = 0;
-//     lasers.push(this); // add the new laser to the array of lasers (factory)
-//     this.move() // when a laser gets created put it in the array and move it.
-//   }
-
-//   move() {
-//     console.log("Moving");
-//     console.log(this); // not sure what this will be...
-//     this.y++
-//     if(this.y < 11) {
-//       const thisLaser = this;
-//       setTimeout(()=>{
-//         thisLaser.move();
-//         }, 15);
-//     }
-//   },
-
-//   render(){
-//     console.log("RENDERING LASER");
-//     $(`.game-square[x="${this.x}"])[y="${this.y - 1}"]`.removeClass('laser');
-//     $(`.game-square[x="${this.x}"])[y="${this.y}"]`.addClass('laser');
-//     });
-//     lasers = lasers.filter((laser => layer.y <= 9)); // purge lasers not on grid (may now want to do each time)
-//   }
-// }
-
-// // 2) Place a ship
-// const ship: {
-//   x: 5,
-//   y: 0
-//   render() {
-//     // clear current div
-//     $('.ship').removeClass('ship');
-//     // put it on the new square
-//     $(`.game-square[x={this.x}][y=${this.y}]`).addClass('ship');
-//   },
-//   move(direction) {
-//     if(direction === 'left' && this.x > 0) {
-//         this.x--;
-//     } else if (direction === 'right' && this.x < 9) {
-//         this.x++
-//     }
-//     this.render();
-//   },
-
-//   // 3) Ship fires laser up
-//   fireTheLaser(){
-//     console.log(`FireTheLasers on Col ${this.y}!`);
-//     const myLaser = new Laser();
-//   }
-// }
-// ship.render()
-
-// //  - Ship moves right/left
-// // look for KeyCode
-// $('body').keyup((e)=>{
-//   console.log(e.KeyCode)
-
-// if(e.KeyCode === 37)
-//   ship.move("left");
-// } else if (e.KeyCode === 39)
-//   ship.move("right");
-
-// //4) Aliens appear
-// // If div has a class already === 'alien' then collision has occurred.
-
-// // Global Variables
-// const $bgMusic = $('.bg-music').prop({ src: 'audio/01-SpyHunter-A8-SpyHunterTheme.ogg', preload: 'auto' });
-
-// // $(document).ready(() => {
-// // });
-
-// $('form').on('submit', (e) => {
-//   e.preventDefault();
-//     playAudio();
-// });

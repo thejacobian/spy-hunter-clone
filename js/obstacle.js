@@ -29,21 +29,11 @@ class Obstacle {
   }
 
   move(ctx) {
-  // adjusts the vertical location by speed.
-  this.y += this.speed;
-  // clears the canvas and draws the new location
-  renderCanvas(ctx);
-  // remember -- this will be called every 1/60th of a second 
-  return this;
-}
-
-  populate(tileX, tileY) {
-    //place obstacle on canvas
-    return this;
-  }
-
-  remove(tileX, tileY) {
-    // remove obstacle from canvas.
+    // adjusts the vertical location by speed.
+    this.y += (this.speed * myGame.playerSpeedAdjust);
+    // clears the canvas and draws the new location
+    renderCanvas(ctx);
+    // remember -- this will be called every 1/60th of a second 
     return this;
   }
 }
@@ -87,6 +77,7 @@ class CivilianMotorbike extends Obstacle {
     this.hitpoints = 1;
     this.speed = 2;
     this.points = 200;
+    this.color = 'red';
   }
 
   // populate(tileX, tileY) {

@@ -5,19 +5,19 @@ const renderCanvas = (ctx) => {
     // clears the canvas
     clearCanvas(ctx);
 
-    // // draw left road shoulder obstacle
-    // myGame.leftShoulderArray.forEach(function(leftShoulderTile) {
-    //   leftShoulderTile.draw(ctx);
-    // });
+    // draw left road shoulder obstacle
+    myGame.leftShoulderArray.forEach(function(leftShoulderTile) {
+      leftShoulderTile.draw(ctx);
+    });
 
-    // // draw right road shoulder obstacle
-    // myGame.rightShoulderArray.forEach(function(rightShoulderTile) {
-    //   rightShoulderTile.draw(ctx);
-    // });
+    // draw right road shoulder obstacle
+    myGame.rightShoulderArray.forEach(function(rightShoulderTile) {
+      rightShoulderTile.draw(ctx);
+    });
 
     // draw all obstacles including civilions
-    myGame.obstacleArray.forEach(function(obstacle) {
-      obstacle.draw(ctx);
+    myGame.potholeArray.forEach(function(pothole) {
+      pothole.draw(ctx);
     });
 
     // draw enemies on screen
@@ -25,10 +25,10 @@ const renderCanvas = (ctx) => {
       enemy.draw(ctx);
     });
 
-    // // draw civilians
-    // myGame.civilianArray.forEach(function(civilian) {
-    //   civilian.draw(ctx);
-    // });
+    // draw civilians
+    myGame.civilianArray.forEach(function(civilian) {
+      civilian.draw(ctx);
+    });
 
     // draw the spy car players on screen
     myGame.playersArray.forEach(function(player) {
@@ -39,16 +39,6 @@ const renderCanvas = (ctx) => {
     myGame.activePlayer.weaponsArray.forEach(function(projectile) {
       projectile.draw(ctx);
     });
-
-    // // draw the missiles on screen
-    // myGame.activePlayer.fireMissileArray.forEach(function(missile) {
-    //   missile.draw(ctx);
-    // });
-
-    // // draw the oils on screen
-    // myGame.activePlayer.dropOilArray.forEach(function(oil) {
-    //   oil.draw(ctx);
-    // });
 
     // // draw a circle
     // makeCircle(this.ctx, 75, 325, 71, 0, Math.PI * 2, 'orange', 2);

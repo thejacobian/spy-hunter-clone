@@ -12,29 +12,40 @@ class Game {
     this.minutes = 0;
     this.stillTrainingFlag = true;
     this.showStartupMsgFlag = true;
-    this.speedMultiplier = 1;
+    this.speedUpCtr = 0;
+    this.speedUpRatio = 1.0;
+    this.playerSpeedAdjust = 1;
+    this.dropEntitySpeedAdjust = 1;
     this.timePassing;
     this.message = '';
     this.$commsBar = $('.game-comms').children('h1').eq(0);
     this.type = type; //Alternating or Co-op
+
+
+    // objects for handling population of screen
     this.$gameCanvas = $('#game-canvas');
     this.gridSize = 25;
     this.ctx = this.$gameCanvas[0].getContext('2d');
-
     this.leftShoulderArray = [];
     this.rightShoulderArray = [];
-    this.obstacleArray = [];
+    this.potholeArray = [];
     this.civilianArray = [];
+    this.obstacleArray = [];
     this.enemyArray = [];
     this.playersArray = [];
     this.playerOne;
     this.playerTwo;
     this.activePlayer;
     this.requestID;
-    this.animationRunningFlag = false;
-    this.animationRunningCtr= 0;
-    this.animationRunningCtrFlag = false;
   
+    // animation fps and speed up and down key handling
+    this.animationRunningFlag = false;
+    this.fps = 55;
+    this.fpsInterval
+    this.startTime;
+    this.then
+    this.now
+    this.elapsed;
     this.xFrame = 0;
   }
 
@@ -55,21 +66,71 @@ class Game {
     this.activePlayer = this.playerOne;
   }
 
+  // Get Random Int between two numbers (inclusive)
+  getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }
+
+  // Get Random Float between two numbers (inclusive)
+  getRandomFloat(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  // create new road shoulder obstacles
+  newShoulderTiles(type) {
+
+    const newLeftShoulderY = this.leftShoulderArray[this.leftShoulderArray.length - 1].height + 1;
+    const newRightShoulderY = this.rightShoulderArray[this.rightShoulderArray.length - 1].height + 1;
+    
+    // let randomVariability = this.getRandomFloat(0.7, 1.3);
+    // if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width >= 250 && randomVariability > 1) {
+    //   randomVariability = this.getRandomFloat(0.4, 0.9);
+    // } else if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width <= 50 && randomVariability < 1) {
+    //   randomVariability = this.getRandomFloat(1.1, 1.4);
+    // }
+    // const randomWidthSizeChange = randomVariability * this.rightShoulderArray[this.rightShoulderArray.length - 1].width;
+    // const newRightShoulderX = this.ctx.canvas.width - randomWidthSizeChange;
+    // let newShoulderTile = new Obstacle (type, 'left_shoulder_terrain.png', 0, -newLeftShoulderY, randomWidthSizeChange, 600, 'rgb(0, 255, 255)');
+    // this.leftShoulderArray.push(newShoulderTile);
+    // this.obstacleArray.push(newShoulderTile);
+    // newShoulderTile = new Obstacle (type, 'right_shoulder_terrain.png', newRightShoulderX, -newRightShoulderY, randomWidthSizeChange, 600, 'rgb(255, 255, 0)');
+    // this.rightShoulderArray.push(newShoulderTile); 
+    // this.obstacleArray.push(newShoulderTile);
+
+    let randomVariability = this.getRandomFloat(0.7, 1.3);
+    if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width >= 250 && randomVariability > 1) {
+      randomVariability = this.getRandomFloat(0.4, 0.9);
+    } else if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width <= 50 && randomVariability < 1) {
+      randomVariability = this.getRandomFloat(1.1, 1.4);
+    }
+    const randomWidthSizeChange = randomVariability * this.rightShoulderArray[this.rightShoulderArray.length - 1].width;
+    const newRightShoulderX = this.ctx.canvas.width - randomWidthSizeChange;
+    let newShoulderTile = new Obstacle (type, 'left_shoulder_terrain.png', 0, -newLeftShoulderY, randomWidthSizeChange, 600, 'rgb(0, 255, 255)');
+    this.leftShoulderArray.push(newShoulderTile);
+    this.obstacleArray.push(newShoulderTile);
+    newShoulderTile = new Obstacle (type, 'right_shoulder_terrain.png', newRightShoulderX, -newRightShoulderY, randomWidthSizeChange, 600, 'rgb(255, 255, 0)');
+    this.rightShoulderArray.push(newShoulderTile); 
+    this.obstacleArray.push(newShoulderTile);
+
+    return this;
+  }
+
   initialState() {
 
-    // create left road shoulder obstacle
-    const leftShoulderTile = new Obstacle ('shoulder', 'shoulder_terrain.png', 0, 0, 100, 600, 'rgb(0, 255, 255)')
+    // create first left road shoulder obstacle
+    const leftShoulderTile = new Obstacle ('left shoulder', 'left_shoulder_terrain.png', 0, 0, 100, 600, 'rgb(0, 255, 255)');
     this.leftShoulderArray.push(leftShoulderTile);
     this.obstacleArray.push(leftShoulderTile);
-
-    // create right road shoulder obstacle
-    const rightShoulderTile = new Obstacle ('shoulder', 'shoulder_terrain.png', 500, 0, 100, 600, 'rgb(0, 255, 255)')
+    // create first right road shoulder obstacle
+    const rightShoulderTile = new Obstacle ('right shoulder', 'shoulder_terrain.png', 500, 0, 100, 600, 'rgb(0, 255, 255)')
     this.rightShoulderArray.push(rightShoulderTile);
     this.obstacleArray.push(rightShoulderTile);
+    this.newShoulderTiles(); // creates another right road shoulder and pushes into arrays
 
     // create initial pothole obstacle
-    const firstObstacle = new Obstacle ('pothole', 'pothole_icon_1.png', 225, 225, 25, 25, 'green');
-    this.obstacleArray.push(firstObstacle);
+    const firstPothole = new Obstacle ('pothole', 'pothole_icon_1.png', 225, 225, 25, 25, 'green');
+    this.potholeArray.push(firstPothole);
+    this.obstacleArray.push(firstPothole);
 
     // create initial enemy
     const firstEnemy = new Enemy ('basic badguy', 'baddie_icon_1.png');
@@ -113,7 +174,7 @@ class Game {
     }
 
     // start playing background audio on a loop;
-    this.bgAudio.loop =true;
+    this.bgAudio.loop = true;
     //this.bgAudio.play();
   
     // display initial message
@@ -127,6 +188,7 @@ class Game {
     $('#fire-missile').prop('disabled', false);
     $('#drop-oil').prop('disabled', false);
 
+    // instantiate initial game state conditions and draw
     this.initialState();
 
     return this;
@@ -154,7 +216,6 @@ class Game {
     $('.lives-meter').text(`${this.playerOne.lives}`);
     $('.lives-meter').css('color', 'white');
     $('.player-name').text('Player 1');
-    //$('canvas').clear();
     this.showStartupMsg = true;
     this.bgAudio.pause();
     this.bgAudio.loop =true;

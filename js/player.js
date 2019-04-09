@@ -69,8 +69,8 @@ class Player {
     renderCanvas(ctx); //, this.x, this.y, this.width, this.height);
     // move it if it should be moving
     // remember -- this will be called every 1/60th of a second 
-    if(this.direction.up && this.y > 5) this.y -= this.speed;
-    if(this.direction.right && this.x < (ctx.canvas.width  - this.width - 5)) this.x += this.speed;
+    if(this.direction.up && this.y > (ctx.canvas.height/2 - this.height + 55)) this.y -= this.speed;
+    if(this.direction.right && this.x < (ctx.canvas.width - this.width - 5)) this.x += this.speed;
     if(this.direction.down && this.y < (ctx.canvas.height - this.height - 5)) this.y += this.speed;
     if(this.direction.left && this.x > 5) this.x -= this.speed;
     return this;

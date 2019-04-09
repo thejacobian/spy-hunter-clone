@@ -21,7 +21,7 @@ class Weapon {
 
   // canvas draw method
   draw(ctx) {
-    makeRectangle(ctx, this.x, this.y, this.width, this.height, this.color, this.color, 1)
+    makeRectangle(ctx, this.x, this.y, this.width, this.height, 'none', this.color, 1)
   }
   
   move(ctx) {
@@ -29,7 +29,7 @@ class Weapon {
     renderCanvas(ctx); //, this.x, this.y, this.width, this.height);
     // move it if it should be moving
     // remember -- this will be called every 1/60th of a second 
-    this.y -= this.speed;
+    this.y -= (this.speed);;
     return this;
   }
 
@@ -76,5 +76,14 @@ class OilSlick extends Weapon {
     this.y = myGame.activePlayer.y + 50; // start bullets in front of car
     this.width = 20;
     this.height = 20;
+  }
+
+    move(ctx) {
+    // clear it first, then move it.
+    renderCanvas(ctx); //, this.x, this.y, this.width, this.height);
+    // move it if it should be moving
+    // remember -- this will be called every 1/60th of a second 
+    this.y -= (this.speed * myGame.playerSpeedAdjust);;
+    return this;
   }
 }

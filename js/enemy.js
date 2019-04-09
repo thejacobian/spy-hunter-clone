@@ -57,26 +57,16 @@ class Enemy {
     }
   }
 
-  unsetDirection() {
-    // releasing a key means we should no longer be moving in that direction
-    // remember -- move will be called every 1/60th of a second regardless
-    // remember -- move will be called every 1/60th of a second regardless
-    // if(key === "ArrowUp") this.direction.up = false;
-    // if(key === "ArrowLeft") this.direction.left = false;
-    // if(key === "ArrowDown") this.direction.down = false;
-    // if(key === "ArrowRight") this.direction.right = false;
-  }
-
   move(ctx) {
     // clear it first, then move it.
     renderCanvas(ctx); //, this.x, this.y, this.width, this.height);
     // move it if it should be moving
     // remember -- this will be called every 1/60th of a second 
     this.y += 1;
-    if(this.direction.up && this.y > 5) this.y -= this.speed;
-    if(this.direction.right && this.x < (ctx.canvas.width  - this.width - 5)) this.x += this.speed;
-    if(this.direction.down && this.y < (ctx.canvas.height - this.height - 5)) this.y += this.speed;
-    if(this.direction.left && this.x > 5) this.x -= this.speed;
+    if(this.direction.up && this.y > 5) this.y -= this.speed * 0.75;
+    if(this.direction.right && this.x < (ctx.canvas.width  - this.width - 5)) this.x += this.speed * 0.5;
+    if(this.direction.down && this.y < (ctx.canvas.height - this.height - 5)) this.y += (this.speed * myGame.playerSpeedAdjust);;
+    if(this.direction.left && this.x > 5) this.x -= this.speed * 0.5;
     return this;
   }
 
@@ -123,7 +113,7 @@ class TireSlasher extends Enemy {
 // Extended Bulletproof Bully class that must be run off the road.
 class BulletproofBully extends Enemy {
   constructor(type, icon) {
-    super('bulletproof', icon);
+    super('bulletproof bully', icon);
     this.points = 1500;
     this.hitpoints = 100000000;
     this.speed = 3;
@@ -143,7 +133,7 @@ class BulletproofBully extends Enemy {
 
 class DoubleBarrelAction extends Enemy {
   constructor(type, icon) {
-    super('doublebarrel', icon);
+    super('doublebarrel action', icon);
     this.points = 2000;
     this.hitpoints = 250;
     this.speed = 2;
@@ -163,7 +153,7 @@ class DoubleBarrelAction extends Enemy {
 
 class MasterOfTheSkies extends Enemy {
   constructor(type, icon) {
-    super('master', icon);
+    super('master of the skies', icon);
     this.points = 2500;
     this.hitpoints = 50;
     this.speed = 5;
