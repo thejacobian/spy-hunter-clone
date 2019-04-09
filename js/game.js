@@ -38,6 +38,12 @@ class Game {
     this.activePlayer;
     this.requestID;
   
+    this.enemyRemovedFlag = false;
+    this.potholeRemovedFlag = false;
+    this.civilianRemovedFlag = false;
+    this.leftShoulderRemovedFlag = false;
+    this.rightShoulderRemovedFlag = false;
+
     // animation fps and speed up and down key handling
     this.animationRunningFlag = false;
     this.fps = 55;
@@ -97,7 +103,7 @@ class Game {
     // this.rightShoulderArray.push(newShoulderTile); 
     // this.obstacleArray.push(newShoulderTile);
 
-    let randomVariability = this.getRandomFloat(0.7, 1.3);
+    let randomVariability = this.getRandomFloat(0.6, 1.4);
     if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width >= 250 && randomVariability > 1) {
       randomVariability = this.getRandomFloat(0.4, 0.9);
     } else if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width <= 50 && randomVariability < 1) {
@@ -112,6 +118,8 @@ class Game {
     this.rightShoulderArray.push(newShoulderTile); 
     this.obstacleArray.push(newShoulderTile);
 
+    myGame.leftShoulderRemovedFlag = false;
+    myGame.rightShoulderRemovedFlag = false;
     return this;
   }
 

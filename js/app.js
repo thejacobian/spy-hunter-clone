@@ -157,6 +157,7 @@ const animate = () => {
         // flag for removal any enemies no longer on the scren
         if (enemy.y > myGame.ctx.canvas.height) {
           enemy.alive = false;
+          myGame.enemyRemovedFlag = true;
         } else {
           enemy.setDirection();
           enemy.move(myGame.ctx);
@@ -168,6 +169,7 @@ const animate = () => {
         // flag for removal any obstacles no longer on the screen
         if (pothole.y > myGame.ctx.canvas.height) {
           pothole.alive = false;
+          myGame.potholeRemovedFlag. true;
         } else {
           // otherwise move the obstacle
           pothole.move(myGame.ctx);
@@ -179,6 +181,7 @@ const animate = () => {
         // flag for removal any obstacles no longer on the screen
         if (leftShoulder.y > myGame.ctx.canvas.height) {
           leftShoulder.alive = false;
+          myGame.leftShoulderRemovedFlag = true;
         } else {
           // otherwise move the obstacle
           leftShoulder.move(myGame.ctx);
@@ -190,6 +193,7 @@ const animate = () => {
         // flag for removal any obstacles no longer on the screen
         if (rightShoulder.y > myGame.ctx.canvas.height) {
           rightShoulder.alive = false;
+          myGame.rightShoulderRemovedFlag = true;
         } else {
           // otherwise move the obstacle
           rightShoulder.move(myGame.ctx);
@@ -201,6 +205,7 @@ const animate = () => {
         // flag for removal any obstacles no longer on the screen
         if (civilian.y > myGame.ctx.canvas.height) {
           civilian.alive = false;
+          myGame.civilianRemovedFlag = true;
         } else {
           // otherwise move the obstacle
           civilian.move(myGame.ctx);
@@ -328,6 +333,11 @@ const animate = () => {
       myGame.activePlayer.weaponsArray = myGame.activePlayer.weaponsArray.filter(function(weapon) {
         return weapon.alive === true;
       });
+
+      // add a new shoulder if one was removed from the array offscreen
+      if (myGame.leftShoulderRemovedFlag) {
+        myGame.newShoulderTiles();
+      }
 
       // if player's hitpoints reach 0 remove a life
       if (myGame.activePlayer.hitpoints < 1) {
