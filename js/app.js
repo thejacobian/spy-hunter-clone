@@ -34,8 +34,8 @@ const secondsGoUp = () => {
     $('.lives-meter').css('color', 'red');
   }
 
-  // handle game state transition for things that happen at 0 min 5 seconds
-  if (myGame.minutes === 0 && myGame.seconds === 5) {
+  // handle game state transition for things that happen at 0 min 1 seconds
+  if (myGame.minutes === 0 && myGame.seconds === 1) {
     //disable unlimited retry "training" mode and start losing lives
     myGame.stillTrainingFlag = false;
   }
@@ -168,15 +168,21 @@ const animate = () => {
         myGame.activePlayer.score -= obstacle.damage;
         $('.score-meter').text(myGame.activePlayer.score);
         myGame.activePlayer.hitpoints -= obstacle.damage;
+        obstacle.hitpoints -= myGame.activePlayer.collisionDamage;
         myGame.activePlayer.justDamagedFlag = true;
         setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 3000);
+      }
+
+      // set obstacle/civilion's dead flag if hp below 0
+      if (obstacle.hitpoints < 0) {
+        obstacle.alive = false;
       }
     }
   });
 
   // check for collision with enemies
   myGame.enemyArray.forEach(function(enemy) {
-    if (myGame.activePlayer.colCheck(enemy)) {
+    if (myGame.activePlayer.checkCollisionDirection(enemy)) {
       if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
         myGame.printSomething(`Collision with ${enemy.type} from ${myGame.activePlayer.colDir}!`);
         myGame.activePlayer.score -= enemy.damage;

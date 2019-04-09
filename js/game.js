@@ -34,6 +34,7 @@ class Game {
     this.animationRunningFlag = false;
     this.animationRunningCtr= 0;
     this.animationRunningCtrFlag = false;
+  
     this.xFrame = 0;
   }
 

@@ -7,7 +7,7 @@ class Obstacle {
   constructor(type, icon, startX, startY, width, height, color) {
     this.type = type;
     this.icon = icon;
-    this.damage = 50;
+    this.damage = 25;
     this.speed = 1;
     this.points = 0;
     this.hitpoints = 100000000;

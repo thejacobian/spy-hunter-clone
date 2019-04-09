@@ -9,7 +9,7 @@ class Player {
     this.type =type; // Alternating or Co-op
     this.icon = icon;
     this.score = 0;
-    this.hitpoints = 100;
+    this.hitpoints = 99;
     this.lives = 3;
     this.missiles = 10;
     this.oils = 10;
@@ -76,22 +76,22 @@ class Player {
     return this;
   }
 
-  // checkCollision(thing) {
-  //   if(
-  //     this.x + this.width > thing.x &&
-  //     this.x < thing.x + thing.width &&
-  //     thing.y < this.y + this.height && 
-  //     thing.y + thing.height > this.y
-  //   ) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // }
+  checkCollision(thing) {
+    if(
+      this.x + this.width > thing.x &&
+      this.x < thing.x + thing.width &&
+      thing.y < this.y + this.height && 
+      thing.y + thing.height > this.y
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   // Modified collision check returning direction from internet canvas platformer tutorial URL below
   // http://www.somethinghitme.com/2013/04/16/creating-a-canvas-platformer-tutorial-part-tw/
-  colCheck(thing) {
+  checkCollisionDirection(thing) {
     // get the vectors to check against
     const vX = (this.x + (this.width / 2)) - (thing.x + (thing.width / 2)),
       vY = (this.y + (this.height / 2)) - (thing.y + (thing.height / 2)),
