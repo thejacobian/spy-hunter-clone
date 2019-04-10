@@ -4,13 +4,21 @@
 
 class Game {
   constructor(type, bgTrack, bgImage) {
+    // Variables that do not reset when we switch playeres (static)
+    this.type = type; //Alternating or Co-op
     this.bgTrack = bgTrack;
-    this.bgAudio = new Audio(bgTrack);
     this.bgImage = bgImage;
-    this.level = 0;
-    this.levelUpFlag = true;
+    this.$commsBar = $('.game-comms').children('h1').eq(0);
+    this.$gameCanvas = $('#game-canvas');
+    this.$myPlayerScoreLoc = $('#player-one-score');
+    this.gridSize = 25;
+    this.ctx = this.$gameCanvas[0].getContext('2d');
+
+    // Variables that reset between player switches
     this.seconds = 0;
     this.minutes = 0;
+    this.level = 0;
+    this.levelUpFlag = true;
     this.stillTrainingFlag = true;
     this.showStartupMsgFlag = true;
     this.speedUpCtr = 0;
@@ -18,29 +26,25 @@ class Game {
     this.playerSpeedAdjust = 1;
     this.timePassing;
     this.message = '';
-    this.$commsBar = $('.game-comms').children('h1').eq(0);
-    this.type = type; //Alternating or Co-op
 
-    // objects for handling population of screen
-    this.$gameCanvas = $('#game-canvas');
-    this.gridSize = 25;
-    this.ctx = this.$gameCanvas[0].getContext('2d');
+    // Objects for managing population of screen
     this.leftShoulderArray = [];
     this.leftShoulderTile;
     this.rightShoulderArray = [];
     this.rightShoulderTile;
-    this.potholeArray = [];
+    this.iceArray = [];
     this.civilianArray = [];
     this.obstacleArray = [];
     this.enemyArray = [];
     this.playersArray = [];
-    this.playerOne;
-    this.playerTwo;
-    this.activePlayer;
+    this.playerOne = new Player ('Player 1', 'images/Spy_Car_1.png');
+    this.playerTwo = new Player ('Player 2', 'images/Spy_Car_2.png');
+    this.activePlayer = this.playerOne;
     this.requestID;
   
+    // Define initial Flags for entities for populating later
     this.enemyRemovedFlag = false;
-    this.potholeRemovedFlag = false;
+    this.iceRemovedFlag = false;
     this.civilianRemovedFlag = false;
     this.leftShoulderRemovedFlag = false;
     this.rightShoulderRemovedFlag = false;
@@ -60,20 +64,7 @@ class Game {
     console.log(this.message);
     $(this.$commsBar).text(this.message);
   }
-
-  initializePlayers() {
-    this.playerOne = new Player ('Player 1', 'images/Spy_Car_1.png');
-    this.playerTwo = new Player ('Player 2', 'images/Spy_Car_2.png');
-    if (this.type === 'Alternating') {
-      this.playersArray.push(this.playerOne);
-    } else if (this.type === 'Co-op') {
-      this.playersArray.push(this.playerOne);
-      this.playersArray.push(this.playerTwo);
-    }
-    this.activePlayer = this.playerOne;
-  }
-
-  // Get Random Int between two numbers (inclusive)
+    // Get Random Int between two numbers (inclusive)
   getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
@@ -99,8 +90,8 @@ class Game {
       randomVariability = this.getRandomFloat(0.2, 0.6);
     }
 
-    const randomWidthSizeChange = randomVariability * this.leftShoulderArray[this.leftShoulderArray.length - 1].width;
-    this.leftShoulderTile = new Obstacle ('left shoulder', 'left_shoulder_terrain.png', 0, -newLeftShoulderY, randomWidthSizeChange, 600, 'rgb(0, 255, 255)');
+    const randomWidthSizeChange = Math.floor(randomVariability * this.leftShoulderArray[this.leftShoulderArray.length - 1].width);
+    this.leftShoulderTile = new Obstacle ('left shoulder', 'left_shoulder_terrain.png', 0, -newLeftShoulderY, randomWidthSizeChange, 600, 'rgb(255, 0, 255)');
     this.leftShoulderArray.push(this.leftShoulderTile);
     this.obstacleArray.push(this.leftShoulderTile);
     this.leftShoulderRemovedFlag = false;
@@ -125,7 +116,7 @@ class Game {
       randomVariability = this.getRandomFloat(0.2, 0.6);
     }
 
-    const randomWidthSizeChange = randomVariability * this.rightShoulderArray[this.rightShoulderArray.length - 1].width;
+    const randomWidthSizeChange = Math.floor(randomVariability * this.rightShoulderArray[this.rightShoulderArray.length - 1].width);
 
     const newRightShoulderX = this.ctx.canvas.width - randomWidthSizeChange;
     this.rightShoulderTile = new Obstacle ('right shoulder', 'right_shoulder_terrain.png', newRightShoulderX, -newRightShoulderY, randomWidthSizeChange, newRightShoulderHeight, 'rgb(255, 255, 0)');
@@ -136,20 +127,20 @@ class Game {
     return this;
   }
 
-  // create new porthole tile
-  newPotholeTile() {
+  // create new ice tile
+  newIceTile() {
 
-    // populate up to as many potholes as the game level
-    let randomNumPotholes = Math.floor(Math.random()* myGame.level) + 1;
+    // populate up to as many ices as the game level
+    let randomNumIces = Math.floor(Math.random()* myGame.level) + 1;
     let randomX;
-    let potholeTile;
-    for (let i = 0; i < randomNumPotholes; i++) {
+    let iceTile;
+    for (let i = 0; i < randomNumIces; i++) {
       randomX = this.getRandomInt(0, 575);
-      potholeTile = new Obstacle ('pothole', 'pothole_icon_1.png', randomX, 0, 25, 25, 'green');
-      this.potholeArray.push(potholeTile);
-      this.obstacleArray.push(potholeTile);
+      iceTile = new Obstacle ('ice', 'ice_icon_1.png', randomX, 0, 25, 25, 'teal');
+      this.iceArray.push(iceTile);
+      this.obstacleArray.push(iceTile);
     }
-    this.potholeRemovedFlag = false;
+    this.iceRemovedFlag = false;
 
     return this;
   }
@@ -158,16 +149,17 @@ class Game {
   newCivilianTile() {
 
     // populate up to as many civilians as the game level
-    let randomNumCivilians = Math.floor(Math.random()* myGame.level) + 1;
+    const randomNumCivilians = Math.floor(Math.random()* myGame.level) + 1;
+    const randomChance = Math.random(); // used for probability if conditionals
     let randomX;
     let civilianTile;
     if (this.civilianArray < 5) {
       for (let i = 0; i < randomNumCivilians; i++) {
-        randomX = this.getRandomInt(myGame.leftShoulderTile.width, myGame.rightShoulderTile.x);
-        if (randomX < 345) {
-          civilianTile = new CivilianCar ('civilian car', 'civvie_car_icon.png', randomX, 0, 25, 50, 'red');
+        randomX = this.getRandomInt(myGame.leftShoulderTile.width + 50, myGame.rightShoulderTile.x - 50); 
+        if (randomChance < .6) {
+          civilianTile = new CivilianCar ('civilian car', 'civilian_car_icon.png', randomX, 0);
         } else {
-          civilianTile = new CivilianBike ('civilian bike', 'civvie_bike_icon.png', randomX, 0, 25, 25, 'red');
+          civilianTile = new CivilianBike ('civilian bike', 'civilian_bike_icon.png', randomX, 0);
         }
         this.civilianArray.push(civilianTile);
         this.obstacleArray.push(civilianTile);
@@ -178,10 +170,39 @@ class Game {
     return this;
   }
 
+  // create new enemy tile
+  newEnemyTile() {
+    // populate up to as many enemys as the game level
+    const randomNumEnemies = Math.floor(Math.random()* myGame.level) + 1;
+    const randomChance = Math.random(); // used for probability if conditionals
+    let randomX;
+    let enemyTile;
+    if (this.enemyArray < 5) {
+      for (let i = 0; i < randomNumEnemies; i++) {
+        randomX = this.getRandomInt(myGame.leftShoulderTile.width + 50, myGame.rightShoulderTile.x - 50);
+        if (randomChance < 0.01 * myGame.level) {
+          enemyTile = new MasterOfTheSkies ('master of the skies', 'master_of_the_skies_icon.png', randomX, 0);
+        } else if (randomChance < 0.02 * myGame.level) {
+          enemyTile = new DoubleBarrelAction ('doublebarrel action', 'doublebarel_action_icon.png', randomX, 0);
+        } else if (randomChance < 0.08 * myGame.level) {
+          enemyTile = new BulletproofBully ('bulletproof bully', 'bulletproof_bully_icon.png', randomX, 0);
+        } else if (randomChance < 0.10 * myGame.level) {
+          enemyTile = new Tireslasher ('tireslasher', 'tireslasher_icon.png', randomX, 0);
+        } else {
+          enemyTile = new Enemy ('basic enemy', 'basic_enemy_icon.png', randomX, 0);
+        }
+        this.enemyArray.push(enemyTile);
+      }
+      this.enemyRemovedFlag = false;
+    }
+
+    return this;
+  }
+
   initialState() {
 
     // create initial left road shoulder obstacle
-    this.leftShoulderTile = new Obstacle ('left shoulder', 'left_shoulder_terrain.png', 0, 0, 100, 600, 'rgb(0, 255, 255)');
+    this.leftShoulderTile = new Obstacle ('left shoulder', 'left_shoulder_terrain.png', 0, 0, 100, 600, 'rgb(255, 0, 255)');
     this.leftShoulderArray.push(this.leftShoulderTile);
     this.obstacleArray.push(this.leftShoulderTile);
 
@@ -193,18 +214,18 @@ class Game {
     this.newLeftShoulderTile(); // creates another left road shoulder and pushes into arrays
     this.newRightShoulderTile(); // creates another right road shoulder and pushes into arrays
 
-    // create initial pothole obstacle
-    const firstPothole = new Obstacle ('pothole', 'pothole_icon_1.png', 225, 225, 25, 25, 'green');
-    this.potholeArray.push(firstPothole);
-    this.obstacleArray.push(firstPothole);    
+    // create initial ice obstacle
+    const firstIce = new Obstacle ('ice', 'ice_icon.png', 225, 225, 25, 25, 'teal');
+    this.iceArray.push(firstIce);
+    this.obstacleArray.push(firstIce);    
 
     // create initial civilian obstacle
-    const firstCivilian = new CivilianCar ('civilian car', 'civvie_icon.png', 300, 400, 25, 50, 'red');
+    const firstCivilian = new CivilianCar ('civilian car', 'civilian_car_icon.png', 300, 400);
     this.civilianArray.push(firstCivilian);
     this.obstacleArray.push(firstCivilian);
 
     // create initial enemy
-    const firstEnemy = new Enemy ('basic badguy', 'baddie_icon_1.png');
+    const firstEnemy = new Enemy ('basic enemy', 'basic_enemy_icon.png', 250, 0);
     this.enemyArray.push(firstEnemy); 
 
     // create spy car box
@@ -223,28 +244,45 @@ class Game {
     return this;
   }
 
+  // initialize players
+  initializePlayers() {
+    if (this.type === 'Alternating') {
+      if (this.xFrame === 0 && this.playerOne.score === 0) {
+        this.playersArray.push(this.playerOne);
+      } else {
+        this.playersArray.push(this.playerTwo);
+        this.activePlayer = this.playerTwo;
+      }
+    } else if (this.type === 'Co-op') {
+      this.playersArray.push(this.playerOne);
+      this.playersArray.push(this.playerTwo);
+    }
+  }
+
   start() {
     // show initial startup message an prologue
     if (this.showStartupMsgFlag) {
       this.initializePlayers();
 
-      // this.message = `The badguys have just stolen the nuclear launchcodes and are making their escape in a getaway car. You are a Master Spy Driver who must chase them down, while fending off the minions with your G-6155 Interceptor spy-mobile.\n\nWhat is your codename?`;
-      $('#player-name').text('Jake Spy'); // prompt(this.message));
-      if (this.playerOne.name === 'Player 1') {
-        this.activePlayer = this.playerOne;
-      } else if (playerTwo.name === 'Player 2') {
-        this.acivePlayer = this.playerTwo;
+      this.message = `An evil mastermind has just stolen the nuclear launchcodes and they are making their escape in a getaway car. You are a Master Spy Driver who must chase them down, while fending off the minions with your G-6155 Interceptor Spy-Mobile.\n\nWhat is your codename?`;
+      if (this.activePlayer.name ===  this.playerOne.name) {
+        this.playerOne.name = prompt(this.message);
+        this.activePlayer.name = this.playerOne.name;
+        $('#player-one-name').text(this.playerOne.name);
+      } else {
+        this.playerTwo.name = prompt(this.message);
+        this.activePlayer.name = this.playerTwo.name;
+        $('#player-two-name').text(this.playerTwo.name);
       }
-      this.activePlayer.name = $('#player-name').text();
       this.showStartupMsgFlag = false;
     }
 
     // start playing background audio on a loop;
     this.bgAudio.loop = true;
-    //this.bgAudio.play();
+    this.bgAudio.play();
   
     // display initial message
-    this.message = `Agent ${this.activePlayer.name} reporting for duty. In pursuit of target...`;
+    this.message = `Special Agent ${this.activePlayer.name} reporting for duty. In pursuit of target...`;
     $(this.$commsBar).text(this.message);
     console.log(this.message);
 
@@ -260,36 +298,76 @@ class Game {
     return this;
   }
 
-  reset() {
-    this.message = '`You started over. The fate of the world is in your hands, good luck!';
+  nextPlayer() {
+    this.message = `It's the next player's turn. The fate of the world is in your hands, good luck!`;
     this.printSomething(this.message);
     clearInterval(this.timePassing);
-    this.initializePlayers();
-    this.activePlayer = this.playerOne;
-    this.timePassing = 0;
+
+    // Reset variables that reset between player switches
     this.seconds = 0;
     this.minutes = 0;
-    this.level = 1;
-    this.speedMultiplier = 1;
+    this.level = 0;
+    this.levelUpFlag = true;
+    this.stillTrainingFlag = true;
+    this.showStartupMsgFlag = true;
+    this.speedUpCtr = 0;
+    this.speedUpRatio = 1.0;
+    this.playerSpeedAdjust = 1;
+    this.timePassing;
+    this.message = '';
+
+    // Reset objects for managing population of screen
+    this.leftShoulderArray = [];
+    this.leftShoulderTile;
+    this.rightShoulderArray = [];
+    this.rightShoulderTile;
+    this.iceArray = [];
+    this.civilianArray = [];
+    this.obstacleArray = [];
+    this.enemyArray = [];
+    this.playersArray = [];
+    this.playerOne = new Player ('Player 1', 'images/Spy_Car_1.png');
+    this.playerTwo = new Player ('Player 2', 'images/Spy_Car_2.png');
+    this.activePlayer = this.playerOne;
+    this.requestID;
+  
+    // Reset initial Flags for entities for populating later
+    this.enemyRemovedFlag = false;
+    this.iceRemovedFlag = false;
+    this.civilianRemovedFlag = false;
+    this.leftShoulderRemovedFlag = false;
+    this.rightShoulderRemovedFlag = false;
+
+    // Reset animation fps and speed up and down key handling
+    this.animationRunningFlag = false;
+    this.fps = 55;
+    this.fpsInterval
+    this.startTime;
+    this.then
+    this.now
+    this.elapsed;
+    this.xFrame = 0;
+
+    // Initialize for Player 2's turn.
+    this.initializePlayers();
+    this.activePlayer = this.playerTwo;
+
+    // Clear some html counters and css from Player 1.
     $('.sec').text(`0${this.seconds}`);
     $('.min').text(`${this.minutes}`);
     $('.score-meter').text(0);
     $('.level-meter').text(this.level);
-    $('.missile-meter').text(`${this.playerOne.missiles}`);
+    $('.missile-meter').text(`${this.activePlayer.missiles}`);
     $('.missile-meter').css('color', 'white');
-    $('.oil-meter').text(`${this.playerOne.oils}`);
+    $('.oil-meter').text(`${this.activePlayer.oils}`);
     $('.oil-meter').css('color', 'white');
-    $('.lives-meter').text(`${this.playerOne.lives}`);
+    $('.lives-meter').text(`${this.activePlayer.lives}`);
     $('.lives-meter').css('color', 'white');
-    $('.player-name').text('Player 1');
-    this.showStartupMsg = true;
-    this.bgAudio.pause();
-    this.bgAudio.loop =true;
-    this.xFrame = 0;
-    this.requestID = null;
-    this.animationRunningFlag = false;
-    this.showStartupMsgFlag = true;
+    $('.player-name').text('PL2');
+
+    // Start the game.
     this.start();
+
     return this;
   }
 }

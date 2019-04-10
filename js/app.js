@@ -8,7 +8,7 @@ let myGame = new Game('Alternating', 'audio/01-SpyHunter-A8-SpyHunterTheme.ogg',
 const playAudio = (sound) => {
   const playSound = new Audio(sound);
   playSound.play();
-  return this;
+  return playSound;
 };
 
 const secondsGoUp = () => {
@@ -41,18 +41,24 @@ const secondsGoUp = () => {
       $('.level-meter').text(myGame.level);
       // handle things as the level increases
       if (myGame.level === 2) {
-        myGame.numCivilians++;
-        myGame.numPotholes++;
+        //myGame.numCivilians++;
+        //myGame.numIces++;
       } else if (myGame.level === 3) {
-        myGame.numBaddies++;
+        //myGame.numCivilians++;
+        //myGame.numIces++;
+        //myGame.numEnemies++;
       } else if (myGame.level === 4) {
-        myGame.activateTireSlasher = true;
+        //myGame.numCivilians++;
+        //myGame.numIces++;
+        //myGame.numEnemies++;
       } else if (myGame.level === 5) {
-        myGame.activateBulletproofBully = true;
+        //myGame.numCivilians++;
+        //myGame.numIces++;
+        //myGame.numEnemies++;
       } else if (myGame.level === 6) {
-        myGame.activateDoubleBarrelAction = true;
+        //myGame.numIces++;
       } else if (myGame.level >= 7) {
-        myGame.activateMasterOfTheSkies = true;
+        //myGame.numIces++;
       }
 
       myGame.message = `Congratulations! You have reached level ${myGame.level}!`;
@@ -62,7 +68,7 @@ const secondsGoUp = () => {
     }
   }
 
-// do stuff every 20 seconds like increment the level and therefore the number and type of badguys
+  // do stuff every 21 seconds like reset the levelUpFlag
   if (myGame.seconds !== 0 && myGame.seconds % 21 === 0) {
     myGame.levelUpFlag = true;
   }
@@ -71,46 +77,45 @@ const secondsGoUp = () => {
   if (myGame.minutes === 0 && myGame.seconds === 1) {
     //disable unlimited retry "training" mode and start losing lives
     myGame.stillTrainingFlag = false;
-
-    // if(enemy.type === "basic"){
-    //   this.enemyClass = Enemy;
-    // } else if (enemy.type === "tireslasher"){
-    //   this.enemyClass = TireSlasher;
-    // } else if (options.type === "bulletproof bully"){
-    //   this.enemyClass = BulletproofBully;
-    // } else if (options.type === "doublebarrel action"){
-    //   this.enemyClass = DoubleBarrelAction;
-    // } else { // must be "master of the skies"
-    //   this.enemyClass = MasterOfTheSkies
   }
 
   // handle game state transition for things that happen at 3 mins
   if (myGame.minutes === 3 && myGame.seconds === 0) {
-    //perhaps we will update the level here or base it on score?
+    //perhaps we will update the level here???
   }
 
   // handle awarding an extra life every 1000 points scaling with level.
-  if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (1000 * myGame.level === 0)) {
+  if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (1000 * myGame.level) === 0) {
     myGame.activePlayer.lives++;
-    mygame.message = `You have earned an extra life! Number of Lives remaining: ${myGame.activePlayer.lives}`;
+    myGame.message = `You have earned an extra life! Number of Lives remaining: ${myGame.activePlayer.lives}`;
     myGame.printSomething(myGame.message);
   }
 
  // do end game logic if player runs out of lives
   if (myGame.activePlayer.lives <= 0) {
     // change player image to dead image/ or explosion animation
-    //$('canvas').prop('src', 'images/RoombaInnards.gif');
-    
+
     // handle custom ending depending on level achieved
-    if (myGame.level < 2) {
+    if (myGame.level < 5) {
       myGame.message = `Master Spy Driver ${myGame.activePlayer.name} has died and the world was obliterated in a nuclear blast. Game Over!`;
     } else {
-      myGame.message = `Master Spy Driver ${myGame.activePlayer.name} has died and the world was obliterated in a nuclear blast. Game Over!`;
+      myGame.message = `Despite a valiant effort ${myGame.activePlayer.name} has died and the world was obliterated in a nuclear blast. Game Over!`;
     }
     myGame.printSomething(myGame.message);
     //alert(myGame.message);
     clearInterval(myGame.timePassing);
     myGame.timePassing = 0;
+
+    // update high score leaderboard.
+    if (myGame.activePlayer.name === myGame.playerOne.name) {
+      myGame.$myPlayerScoreLoc = $('#player-one-score');
+    } else {
+      myGame.$myPlayerScoreLoc = $('#player-two-score');
+    }
+    if (Number(myGame.$myPlayerScoreLoc.text()) < myGame.activePlayer.score) {
+      myGame.$myPlayerScoreLoc.text(myGame.activePlayer.score);
+    }
+   
     $('#stop').click();
     $('#start').prop('disabled', true);
   }
@@ -155,30 +160,6 @@ const animate = () => {
       myGame.playersArray.forEach(function(player) {
         player.move(myGame.ctx);
       });
-      
-      // move all enemies on screen
-      myGame.enemyArray.forEach(function(enemy) {
-        // flag for removal any enemies no longer on the scren
-        if (enemy.y > myGame.ctx.canvas.height) {
-          enemy.alive = false;
-          myGame.enemyRemovedFlag = true;
-        } else {
-          enemy.setDirection();
-          enemy.move(myGame.ctx);
-        }
-      });
-
-      // move all potholes on screen
-      myGame.potholeArray.forEach(function(pothole) {
-        // flag for removal any obstacles no longer on the screen
-        if (pothole.y > myGame.ctx.canvas.height) {
-          pothole.alive = false;
-          myGame.potholeRemovedFlag = true;
-        } else {
-          // otherwise move the obstacle
-          pothole.move(myGame.ctx);
-        }
-      });
 
       // move all left shoulders on screen
       myGame.leftShoulderArray.forEach(function(leftShoulder) {
@@ -204,6 +185,18 @@ const animate = () => {
         }
       });
 
+      // move all Ices on screen
+      myGame.iceArray.forEach(function(ice) {
+        // flag for removal any obstacles no longer on the screen
+        if (ice.y > myGame.ctx.canvas.height) {
+          ice.alive = false;
+          myGame.iceRemovedFlag = true;
+        } else {
+          // otherwise move the obstacle
+          ice.move(myGame.ctx);
+        }
+      });
+
       // move all civilians on screen
       myGame.civilianArray.forEach(function(civilian) {
         // flag for removal any obstacles no longer on the screen
@@ -213,6 +206,18 @@ const animate = () => {
         } else {
           // otherwise move the obstacle
           civilian.move(myGame.ctx);
+        }
+      });
+
+      // move all enemies on screen
+      myGame.enemyArray.forEach(function(enemy) {
+        // flag for removal any enemies no longer on the scren
+        if (enemy.y > myGame.ctx.canvas.height) {
+          enemy.alive = false;
+          myGame.enemyRemovedFlag = true;
+        } else {
+          enemy.setDirection();
+          enemy.move(myGame.ctx);
         }
       });
 
@@ -257,6 +262,7 @@ const animate = () => {
 
       // check for collision with obstacles
       myGame.obstacleArray.forEach(function(obstacle) {
+        // check for player collision with obstacle
         if (myGame.activePlayer.checkCollision(obstacle)) {
           if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
             myGame.printSomething(`Collision with ${obstacle.type}!`);
@@ -267,12 +273,31 @@ const animate = () => {
             myGame.activePlayer.justDamagedFlag = true;
             setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 3000);
           }
-
-          // set obstacle's/civilian's dead flag if hp below 0
-          if (obstacle.hitpoints < 0) {
-            obstacle.alive = false;
-            myGame.civilianRemovedFlag = true;
+        }
+        // check for enemy collision with obstacle
+        myGame.enemyArray.forEach(function(enemy) {
+          if (enemy.checkCollision(obstacle)) {
+            if (!enemy.justDamagedFlag) {
+              myGame.printSomething(`${enemy.type} collided with ${obstacle.type}!`);
+              if (enemy.type === 'bulletproof bully') {
+                enemy.hitpoints -= 50000000;
+              } else if (enemy.type === 'master of the skies') {
+                //do nothing because flying enemies are not damaged by obstacles
+              } else {
+                enemy.hitpoints -= obstacle.damage;
+              }
+              myGame.activePlayer.score += enemy.points;
+              $('.score-meter').text(myGame.activePlayer.score);
+              obstacle.hitpoints -= enemy.damage;
+              enemy.justDamagedFlag = true;
+              setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 3000);
+            }
           }
+        });
+        // set obstacle's/civilian's dead flag if hp below 0
+        if (obstacle.hitpoints < 0) {
+          obstacle.alive = false;
+          myGame.civilianRemovedFlag = true;
         }
       });
 
@@ -281,25 +306,32 @@ const animate = () => {
         if (myGame.activePlayer.checkCollisionDirection(enemy)) {
           if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
             myGame.printSomething(`Collision with ${enemy.type} from ${myGame.activePlayer.colDir}!`);
-            myGame.activePlayer.score -= (enemy.damage * myGame.playerSpeedAdjust);
+            if (enemy.type === 'bulletproof bully') {
+              enemy.hitpoints -= 50000000;
+              myGame.activePlayer.score += enemy.points;
+            } else {
+              myGame.activePlayer.score -= (enemy.damage * myGame.playerSpeedAdjust);
+            }
             $('.score-meter').text(myGame.activePlayer.score);
             myGame.activePlayer.hitpoints -= enemy.damage;
             enemy.hitpoints -= myGame.activePlayer.collisionDamage;
             myGame.activePlayer.justDamagedFlag = true;
 
-            // handle collision bounce effect
-            if (myGame.activePlayer.colDir === 't') {
-              myGame.activePlayer.y += 100;
-              enemy.y -= 125;
-            } else if (myGame.activePlayer.colDir === 'r') {
-              myGame.activePlayer.x -= 100;
-              enemy.x += 125;
-            } else if (myGame.activePlayer.colDir === 'b') {
-              myGame.activePlayer.y -= 100;
-              enemy.y += 125;
-            } else if (myGame.activePlayer.colDir === 'l') {
-              myGame.activePlayer.x += 100;
-              enemy.x -= 125;
+            // handle collision bounce effect for enemies that are not tireslasher or master of the skies
+            if (enemy.type !== 'tireslasher' && enemy.type !== 'master of the skies') {
+              if (myGame.activePlayer.colDir === 't') {
+                myGame.activePlayer.y += 100;
+                enemy.y -= 125;
+              } else if (myGame.activePlayer.colDir === 'r') {
+                myGame.activePlayer.x -= 100;
+                enemy.x += 125;
+              } else if (myGame.activePlayer.colDir === 'b') {
+                myGame.activePlayer.y -= 100;
+                enemy.y += 125;
+              } else if (myGame.activePlayer.colDir === 'l') {
+                myGame.activePlayer.x += 100;
+                enemy.x -= 125;
+              }
             }
 
             setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 500);
@@ -314,7 +346,7 @@ const animate = () => {
         }
       });
 
-      // remove dead left shoulders
+      // remove dead left road shoulders
       myGame.leftShoulderArray = myGame.leftShoulderArray.filter(function(leftShoulder) {
         return leftShoulder.alive === true;
       });
@@ -323,7 +355,7 @@ const animate = () => {
         myGame.newLeftShoulderTile();
       }
 
-      // remove dead right shoulders
+      // remove dead right road shoulders
       myGame.rightShoulderArray = myGame.rightShoulderArray.filter(function(rightShoulder) {
         return rightShoulder.alive === true;
       });
@@ -332,20 +364,20 @@ const animate = () => {
         myGame.newRightShoulderTile();
       }
 
-      // remove dead potholes
-      myGame.potholeArray = myGame.potholeArray.filter(function(pothole) {
-        return pothole.alive === true;
+      // remove dead Ices
+      myGame.iceArray = myGame.iceArray.filter(function(ice) {
+        return ice.alive === true;
       });
-      // add a new pothole if one was removed from the array offscreen
-      if (myGame.potholeRemovedFlag) {
-        myGame.newPotholeTile();
+      // add a new ice if one was removed from the array offscreen
+      if (myGame.iceRemovedFlag) {
+        myGame.newIceTile();
       }
 
       // remove dead civilians
       myGame.civilianArray = myGame.civilianArray.filter(function(civilian) {
         return civilian.alive === true;
       });
-      // add a new pothole if one was removed from the array offscreen
+      // add a new ice if one was removed from the array offscreen
       if (myGame.civilianRemovedFlag) {
         myGame.newCivilianTile();
       }
@@ -353,17 +385,21 @@ const animate = () => {
       // remove dead obstacles
       myGame.obstacleArray = myGame.obstacleArray.filter(function(obstacle) {
         return obstacle.alive === true;
-      });
+      }); // no need to repopulate as other specific loops handle this
 
       // remove dead enemies
       myGame.enemyArray = myGame.enemyArray.filter(function(enemy) {
         return enemy.alive === true;
       });
+      // add a new enemy if one was removed from the array offscreen
+      if (myGame.enemyRemovedFlag) {
+        myGame.newEnemyTile();
+      }
 
       // remove dead weapon projectiles
       myGame.activePlayer.weaponsArray = myGame.activePlayer.weaponsArray.filter(function(weapon) {
         return weapon.alive === true;
-      });
+      }); // no need to repopulate as the player does this with the keyboard
 
       // if player's hitpoints reach 0 remove a life
       if (myGame.activePlayer.hitpoints < 1) {
@@ -379,6 +415,7 @@ const animate = () => {
 
 // do stuff that happens on start button click
 $('#start').on('click', () => {
+  myGame.bgAudio = playAudio(myGame.bgTrack);
   myGame.start();
   myGame.timePassing = setInterval(secondsGoUp, 1000);
   myGame.xFrame = 0;
@@ -388,6 +425,7 @@ $('#start').on('click', () => {
 // do stuff that happens on pause button click
 $('#pause').on('click', () => {
   myGame.pause();
+  myGame.bgAudio.pause();
   clearInterval(myGame.timePassing);
   stopAnimation();
 });
@@ -407,11 +445,15 @@ $('#drop-oil').on('click', () => {
   myGame.activePlayer.attack('oil');
 });
 
-// do stuff that happens on start-over button click
-$('#start-over').on('click', () => {
-    myGame.reset();
-    myGame = new Game('Alternating', 'audio/01-SpyHunter-A8-SpyHunterTheme.ogg', 'images/spy-hunter_title_dos.png');
-    $('#pause').click();
+// do stuff that happens on next-player button click
+$('#next-player').on('click', () => {
+    $('#player-name').append('<h2/>');
+    $('#player-name.h2').text(myGame.activePlayer.score);
+    myGame.nextPlayer();
+    myGame.bgAudio.pause();
+    myGame.bgAudio.currentTime = 0;
+    //myGame = new Game('Alternating', 'audio/01-SpyHunter-A8-SpyHunterTheme.ogg', 'images/spy-hunter_title_dos.png');
+    //$('#pause').click();
     $('#start').click();
 });
 
@@ -443,7 +485,7 @@ $(document).on('keyup', (e) => {
     
     // if player releases Up Key we speed up background
     if (['ArrowUp'].includes(e.key)) {
-      if (myGame.animationRunningFlag && myGame.speedUpCtr >= 0 && myGame.speedUpCtr < 5) {
+      if (myGame.animationRunningFlag && myGame.speedUpCtr >= 0 && myGame.speedUpCtr < 4) {
         myGame.playerSpeedAdjust = (myGame.playerSpeedAdjust + myGame.speedUpCtr * myGame.speedUpRatio);
         myGame.speedUpCtr++;
       }
@@ -451,15 +493,15 @@ $(document).on('keyup', (e) => {
 
     // if player presses Down Key we slow background
     if (['ArrowDown'].includes(e.key)) {
-      if (myGame.animationRunningFlag && myGame.speedUpCtr > 0 && myGame.speedUpCtr <= 5) {
+      if (myGame.animationRunningFlag && myGame.speedUpCtr > 0 && myGame.speedUpCtr <= 4) {
         myGame.speedUpCtr--;
         myGame.playerSpeedAdjust = (myGame.playerSpeedAdjust - myGame.speedUpCtr * myGame.speedUpRatio);
       }
     }
 
     // handle spacebar key release to shoot machine gun
-    if ([' '].includes(e.key)) {
-      myGame.activePlayer.attack('gun');
+    if (['v'].includes(e.key)) {
+      myGame.activePlayer.attack('machine gun');
     }
 
     // handle c key release to fire missile
@@ -472,7 +514,7 @@ $(document).on('keyup', (e) => {
     // handle x key release to drop oil slick
     if (['x'].includes(e.key)) {
       if (myGame.activePlayer.oils > 0) {
-        myGame.activePlayer.attack('oil');
+        myGame.activePlayer.attack('oil slick');
       }
     }
   }

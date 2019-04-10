@@ -4,23 +4,24 @@
 
 // Basic Enemy Car Class that can be shot or run off the road for points.
 class Enemy {
-  constructor(type, icon) {
+  constructor(type, icon, startX, startY) {
     this.type =type;
     this.icon = icon;
     this.points = 500;
     this.hitpoints = 49;
-    this.speed = 2;
+    this.speed = 1.25;
     this.damage = 20;
     this.weaponsArr = [];
     this.actionsArr = [];
     this.message = '';
     this.alive = true;
+    this.justDamagedFlag = false;
 
     // canvas render properties
-    this.xInit = 250;
-    this.yInit = 0;
-    this.x = 250;
-    this.y = 0;
+    this.xInit = startX;
+    this.yInit = startY;
+    this.x = startX;
+    this.y = startY;
     this.width = 25;
     this.height = 50;
     this.color = 'blue';
@@ -90,13 +91,16 @@ class Enemy {
 }
 
 // Extended tire slasher car class that must be shot.
-class TireSlasher extends Enemy {
-  constructor(type, icon) {
-    super('tireslasher', icon);
+class Tireslasher extends Enemy {
+  constructor(type, icon, startX, startY) {
+    super('tireslasher', icon, startX, startY);
     this.points = 1000;
     this.hitpoints = 100;
-    this.speed = 4;
+    this.speed = 1.5;
     this.damage = 100;
+    this.width = 25;
+    this.height = 50;
+    this.color = 'lime';
   }
 
   // move(direction, velocity) {
@@ -112,12 +116,15 @@ class TireSlasher extends Enemy {
 
 // Extended Bulletproof Bully class that must be run off the road.
 class BulletproofBully extends Enemy {
-  constructor(type, icon) {
-    super('bulletproof bully', icon);
+  constructor(type, icon, startX, startY) {
+    super('bulletproof bully', icon, startX, startY);
     this.points = 1500;
-    this.hitpoints = 100000000;
-    this.speed = 3;
+    this.hitpoints = 99999999;
+    this.speed = 1.75;
     this.damage = 20;
+    this.width = 30;
+    this.height = 60;
+    this.color = 'navy';
   }
 
   // move(direction, velocity) {
@@ -131,13 +138,17 @@ class BulletproofBully extends Enemy {
   // }
 }
 
+// Reinforced stretch limo that can shoot shotguns blasts
 class DoubleBarrelAction extends Enemy {
-  constructor(type, icon) {
-    super('doublebarrel action', icon);
+  constructor(type, icon, startX, startY) {
+    super('doublebarrel action', icon, startX, startY);
     this.points = 2000;
-    this.hitpoints = 250;
-    this.speed = 2;
+    this.hitpoints = 500;
+    this.speed = 1.5;
     this.damage = 50;
+    this.width = 30;
+    this.height = 90;
+    this.color = 'maroon';
   }
 
   // move(direction, velocity) {
@@ -151,13 +162,17 @@ class DoubleBarrelAction extends Enemy {
   // }
 }
 
+// Military helicopter that is very fast and drops bombs when directly overhead
 class MasterOfTheSkies extends Enemy {
-  constructor(type, icon) {
-    super('master of the skies', icon);
+  constructor(type, icon, startX, startY) {
+    super('master of the skies', icon, startX, startY);
     this.points = 2500;
-    this.hitpoints = 50;
-    this.speed = 5;
+    this.hitpoints = 1000;
+    this.speed = 2;
     this.damage = 100;
+    this.width = 75;
+    this.height = 75;
+    this.color = 'olive';
   }
 
   // move(direction, velocity) {

@@ -16,8 +16,8 @@ const renderCanvas = (ctx) => {
     });
 
     // draw all obstacles including civilions
-    myGame.potholeArray.forEach(function(pothole) {
-      pothole.draw(ctx);
+    myGame.iceArray.forEach(function(ice) {
+      ice.draw(ctx);
     });
 
     // draw enemies on screen
@@ -43,12 +43,12 @@ const renderCanvas = (ctx) => {
     // // draw a circle
     // makeCircle(this.ctx, 75, 325, 71, 0, Math.PI * 2, 'orange', 2);
 
-    // draw grid for visual layout
-    makeGrid(ctx, myGame.gridSize, 'rgb(255, 255, 255)', 2);
-        // draw center vertical line
-    makeLine(ctx, 300, 0, 300, 600, 'rgb(255, 0, 255)', 2)
-    // draw center horizontal line
-    makeLine(ctx, 0, 300, 600, 300, 'rgb(255, 0, 255)', 2)
+    // // draw grid for visual layout
+    // makeGrid(ctx, myGame.gridSize, 'rgb(255, 255, 255)', 2);
+    //     // draw center vertical line
+    // makeLine(ctx, 300, 0, 300, 600, 'rgb(255, 0, 255)', 2)
+    // // draw center horizontal line
+    // makeLine(ctx, 0, 300, 600, 300, 'rgb(255, 0, 255)', 2)
   };
 
 

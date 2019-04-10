@@ -19,7 +19,6 @@ class Player {
     this.shootGunArray = [];
     this.fireMissileArray = [];
     this.dropOilArray = [];
-    //this.actionsArr = [];
     this.message = '';
     this.colDir = false;
     this.justDamagedFlag = false;
@@ -127,16 +126,16 @@ class Player {
 
   attack(weapon) {
     let myWeapon;
-    if (weapon === 'gun') {
-      myWeapon = new Weapon('gun', 'images/Gun_1.png');
+    if (weapon === 'machine gun') {
+      myWeapon = new Weapon('machine gun', 'images/Gun_1.png');
       this.shootGunArray.push(myWeapon);
     } else if (weapon === 'missile') {
         myWeapon = new Missile('missile', 'images/Missile_1.png');
         this.fireMissileArray.push(myWeapon);
         this.missiles--;
         $('.missile-meter').text(this.missiles);
-    } else if (weapon === 'oil') {
-        myWeapon = new OilSlick('oil', 'images/Oil_1.png');
+    } else if (weapon === 'oil slick') {
+        myWeapon = new OilSlick('oil slick', 'images/Oil_1.png');
         this.dropOilArray.push(myWeapon);
         this.oils--;
         $('.oil-meter').text(this.oils);

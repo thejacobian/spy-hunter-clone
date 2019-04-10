@@ -2,7 +2,7 @@
 /* eslint-disable object-property-newline */
 /* eslint-disable quotes */
 
-// Terrain such as pothole, road shoulder, road beyond shoulder, water
+// Terrain such as ice, road shoulder, road beyond shoulder, water
 class Obstacle {
   constructor(type, icon, startX, startY, width, height, color) {
     this.type = type;
@@ -39,19 +39,25 @@ class Obstacle {
 }
 
 class CivilianCar extends Obstacle {
-  constructor(type, icon, startX, startY, width, height, color)  {
-    super('civilian car', icon, startX, startY, width, height, color);
+  constructor(type, icon, startX, startY)  {
+    super('civilian car', icon, startX, startY);
     this.hitpoints = 1;
-    this.speed = 1.5;
+    this.speed = 1.25;
     this.points = 100;
+    this.width = 25;
+    this.height = 50;
+    this.color = 'red';
   }
 }
 
 class CivilianBike extends Obstacle {
-  constructor(type, icon, startX, startY, width, height, color) {
-    super('civilian bike', icon, startX, startY, width, height, color);
+  constructor(type, icon, startX, startY) {
+    super('civilian bike', icon, startX, startY);
     this.hitpoints = 1;
-    this.speed = 1.75;
+    this.speed = 1.5;
     this.points = 200;
+    this.width = 8;
+    this.height = 15;
+    this.color = 'orange';
   }
 }
