@@ -29,7 +29,7 @@ class Obstacle {
   }
 
   move(ctx) {
-    // adjusts the vertical location by speed.
+    // adjusts the vertical location by player's car speed.
     this.y += (this.speed * myGame.playerSpeedAdjust);
     // clears the canvas and draws the new location
     renderCanvas(ctx);
@@ -39,59 +39,19 @@ class Obstacle {
 }
 
 class CivilianCar extends Obstacle {
-  constructor(type, icon) {
-    super('civilian car', icon);
+  constructor(type, icon, startX, startY, width, height, color)  {
+    super('civilian car', icon, startX, startY, width, height, color);
     this.hitpoints = 1;
-    this.speed = 3;
+    this.speed = 1.5;
     this.points = 100;
-
-    // canvas render properties
-    this.xInit = 400;
-    this.yInit = 300;
-    this.x = 400;
-    this.y = 300;
-    this.width = 25;
-    this.height = 50;
-    this.color = 'red';
   }
-  
-  // populate(tileX, tileY) {
-  //   //place obstacle on canvas
-  //   return this;
-  // }
-
-  // remove(tileX, tileY) {
-  //   // remove obstacle from canvas
-  //   return this;
-  // }
-
-  // move(direction, velocity) {
-  //   // do civilian movement here
-  //   return this;
-  // }
 }
 
-class CivilianMotorbike extends Obstacle {
-  constructor(type, icon) {
-    super('civilian motorbike', icon);
+class CivilianBike extends Obstacle {
+  constructor(type, icon, startX, startY, width, height, color) {
+    super('civilian bike', icon, startX, startY, width, height, color);
     this.hitpoints = 1;
-    this.speed = 2;
+    this.speed = 1.75;
     this.points = 200;
-    this.color = 'red';
   }
-
-  // populate(tileX, tileY) {
-  //   //place obstacle on canvas
-  //   return this;
-  // }
-
-  // remove(tileX, tileY) {
-  //   // remove obstacle from canvas
-  //   return this;
-  // }
-
-  // move(direction, velocity) {
-  //   // do civilian movement here
-  //   return this;
-  // }
 }

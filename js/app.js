@@ -34,11 +34,38 @@ const secondsGoUp = () => {
     $('.lives-meter').css('color', 'red');
   }
 
-  // do stuff every 10 seconds like adding a new set of road shoulders
-  // myGame.dropEntitySpeedAdjust = Math.round(10 / myGame.playerSpeedAdjust);
-  // if (myGame.seconds !== 0 && myGame.seconds % myGame.dropEntitySpeedAdjust === 0) {
-  //   myGame.newShoulderTiles(); //populate a new set of Shoulder tiles before we reach them.
-  // }
+  // do stuff every 20 seconds like increment the level and therefore the number and type of badguys
+  if (myGame.seconds !== 0 && myGame.seconds % 20 === 0) {
+    if (myGame.levelUpFlag) {
+      myGame.level++;
+      $('.level-meter').text(myGame.level);
+      // handle things as the level increases
+      if (myGame.level === 2) {
+        myGame.numCivilians++;
+        myGame.numPotholes++;
+      } else if (myGame.level === 3) {
+        myGame.numBaddies++;
+      } else if (myGame.level === 4) {
+        myGame.activateTireSlasher = true;
+      } else if (myGame.level === 5) {
+        myGame.activateBulletproofBully = true;
+      } else if (myGame.level === 6) {
+        myGame.activateDoubleBarrelAction = true;
+      } else if (myGame.level >= 7) {
+        myGame.activateMasterOfTheSkies = true;
+      }
+
+      myGame.message = `Congratulations! You have reached level ${myGame.level}!`;
+      myGame.printSomething(myGame.message);
+
+      myGame.levelUpFlag = false;
+    }
+  }
+
+// do stuff every 20 seconds like increment the level and therefore the number and type of badguys
+  if (myGame.seconds !== 0 && myGame.seconds % 21 === 0) {
+    myGame.levelUpFlag = true;
+  }
 
   // handle game state transition for things that happen at 0 min 1 seconds
   if (myGame.minutes === 0 && myGame.seconds === 1) {
@@ -62,34 +89,11 @@ const secondsGoUp = () => {
     //perhaps we will update the level here or base it on score?
   }
 
-  // handle increased difficulty and frenzy
-  if (myGame.activePlayer.score % 1000 ) { // increment level every 1000 points added to the score
-    $('.level-meter').text(myGame.level);
-    if (myGame.levelUpFlag) {
-      myGame.level++;
-      myGame.speedMultiplier += 1;
-
-      // handle things as the level increases
-      if (myGame.level === 2) {
-        // $('.tamaB').css('visibility', 'visible');
-        // message = `Level: ${level} Your ${myTama.type} is getting old. It now frequently gets clogged, does not hold a charge, and generally needs more attention than before.`;
-        // $('#nameB').text(prompt(`It's time to get a new ${myTama.type} to help out. What is the name of your new pet ${myTama.type}?`));
-        // $(myTama.$commsBar).text(message);
-        // console.log(message);
-      } else if (myGame.level === 3) {
-        // do stuff at level 3
-      } else if (myGame.level === 4) {
-        // do stuff at level 4
-      } else if (myGame.level === 5) {
-        // do stuff at level 5
-      } else if (myGame.level === 6) {
-        // do stuff at level 6
-      } else if (myGame.level >= 7) {
-        // do stuff at level 7 or greater
-      }
-
-      myGame.levelUpFlag = false;
-    }
+  // handle awarding an extra life every 1000 points scaling with level.
+  if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (1000 * myGame.level === 0)) {
+    myGame.activePlayer.lives++;
+    mygame.message = `You have earned an extra life! Number of Lives remaining: ${myGame.activePlayer.lives}`;
+    myGame.printSomething(myGame.message);
   }
 
  // do end game logic if player runs out of lives
@@ -169,7 +173,7 @@ const animate = () => {
         // flag for removal any obstacles no longer on the screen
         if (pothole.y > myGame.ctx.canvas.height) {
           pothole.alive = false;
-          myGame.potholeRemovedFlag. true;
+          myGame.potholeRemovedFlag = true;
         } else {
           // otherwise move the obstacle
           pothole.move(myGame.ctx);
@@ -221,7 +225,7 @@ const animate = () => {
           // otherwise move the obstacle
           weapon.move(myGame.ctx);
         }
-        //check if weapon still has property alive and can do damage
+        //check if weapon still is still "alive" and can do damage
         if (weapon.alive) {
           // check for projectile collision with enemy
           myGame.enemyArray.forEach(function(enemy) {
@@ -230,8 +234,10 @@ const animate = () => {
               myGame.printSomething(myGame.message);
               enemy.hitpoints -= weapon.damage;
               if (enemy.hitpoints < 0) {
-                myGame.activePlayer.score += enemy.points;
+                myGame.activePlayer.score += (enemy.points * myGame.playerSpeedAdjust);
+                $('.score-meter').text(myGame.activePlayer.score);
                 enemy.alive = false;
+                myGame.enemyRemovedFlag = true;
               }
               weapon.alive = false;
             }
@@ -242,6 +248,7 @@ const animate = () => {
               myGame.message = `${weapon.type} has hit ${civilian.type} for ${weapon.damage}!`
               myGame.printSomething(myGame.message)
               civilian.alive = false;
+              myGame.civilianRemovedFlag = true;
               weapon.alive = false;
             }  
           });
@@ -264,6 +271,7 @@ const animate = () => {
           // set obstacle's/civilian's dead flag if hp below 0
           if (obstacle.hitpoints < 0) {
             obstacle.alive = false;
+            myGame.civilianRemovedFlag = true;
           }
         }
       });
@@ -273,7 +281,7 @@ const animate = () => {
         if (myGame.activePlayer.checkCollisionDirection(enemy)) {
           if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
             myGame.printSomething(`Collision with ${enemy.type} from ${myGame.activePlayer.colDir}!`);
-            myGame.activePlayer.score -= enemy.damage;
+            myGame.activePlayer.score -= (enemy.damage * myGame.playerSpeedAdjust);
             $('.score-meter').text(myGame.activePlayer.score);
             myGame.activePlayer.hitpoints -= enemy.damage;
             enemy.hitpoints -= myGame.activePlayer.collisionDamage;
@@ -298,10 +306,53 @@ const animate = () => {
           }
           // set enemy's dead flag if hp below 0
           if (enemy.hitpoints < 0) {
-            myGame.activePlayer.score += enemy.points;
+            myGame.activePlayer.score += (enemy.points * myGame.playerSpeedAdjust);
+            $('.score-meter').text(myGame.activePlayer.score);
             enemy.alive = false;
+            myGame.enemyRemovedFlag = true;
           }
         }
+      });
+
+      // remove dead left shoulders
+      myGame.leftShoulderArray = myGame.leftShoulderArray.filter(function(leftShoulder) {
+        return leftShoulder.alive === true;
+      });
+      // add a new left shoulder if one was removed from the array offscreen
+      if (myGame.leftShoulderRemovedFlag) {
+        myGame.newLeftShoulderTile();
+      }
+
+      // remove dead right shoulders
+      myGame.rightShoulderArray = myGame.rightShoulderArray.filter(function(rightShoulder) {
+        return rightShoulder.alive === true;
+      });
+      // add a new right shoulder if one was removed from the array offscreen
+      if (myGame.rightShoulderRemovedFlag) {
+        myGame.newRightShoulderTile();
+      }
+
+      // remove dead potholes
+      myGame.potholeArray = myGame.potholeArray.filter(function(pothole) {
+        return pothole.alive === true;
+      });
+      // add a new pothole if one was removed from the array offscreen
+      if (myGame.potholeRemovedFlag) {
+        myGame.newPotholeTile();
+      }
+
+      // remove dead civilians
+      myGame.civilianArray = myGame.civilianArray.filter(function(civilian) {
+        return civilian.alive === true;
+      });
+      // add a new pothole if one was removed from the array offscreen
+      if (myGame.civilianRemovedFlag) {
+        myGame.newCivilianTile();
+      }
+
+      // remove dead obstacles
+      myGame.obstacleArray = myGame.obstacleArray.filter(function(obstacle) {
+        return obstacle.alive === true;
       });
 
       // remove dead enemies
@@ -309,35 +360,10 @@ const animate = () => {
         return enemy.alive === true;
       });
 
-      // remove dead civilians
-      myGame.civilianArray = myGame.civilianArray.filter(function(civilian) {
-        return civilian.alive === true;
-      });
-
-      // remove dead potholes
-      myGame.potholeArray = myGame.potholeArray.filter(function(pothole) {
-        return pothole.alive === true;
-      });
-
-      // remove dead left shoulders
-      myGame.leftShoulderArray = myGame.leftShoulderArray.filter(function(leftShoulder) {
-        return leftShoulder.alive === true;
-      });
-
-      // remove dead right shoulders
-      myGame.rightShoulderArray = myGame.rightShoulderArray.filter(function(rightShoulder) {
-        return rightShoulder.alive === true;
-      });
-
       // remove dead weapon projectiles
       myGame.activePlayer.weaponsArray = myGame.activePlayer.weaponsArray.filter(function(weapon) {
         return weapon.alive === true;
       });
-
-      // add a new shoulder if one was removed from the array offscreen
-      if (myGame.leftShoulderRemovedFlag) {
-        myGame.newShoulderTiles();
-      }
 
       // if player's hitpoints reach 0 remove a life
       if (myGame.activePlayer.hitpoints < 1) {
@@ -417,15 +443,15 @@ $(document).on('keyup', (e) => {
     
     // if player releases Up Key we speed up background
     if (['ArrowUp'].includes(e.key)) {
-      if (myGame.animationRunningFlag && myGame.speedUpCtr >= 0 && myGame.speedUpCtr < 3) {
-        myGame.speedUpCtr++;
+      if (myGame.animationRunningFlag && myGame.speedUpCtr >= 0 && myGame.speedUpCtr < 5) {
         myGame.playerSpeedAdjust = (myGame.playerSpeedAdjust + myGame.speedUpCtr * myGame.speedUpRatio);
+        myGame.speedUpCtr++;
       }
     }
 
     // if player presses Down Key we slow background
     if (['ArrowDown'].includes(e.key)) {
-      if (myGame.animationRunningFlag && myGame.speedUpCtr > 0 && myGame.speedUpCtr <= 3) {
+      if (myGame.animationRunningFlag && myGame.speedUpCtr > 0 && myGame.speedUpCtr <= 5) {
         myGame.speedUpCtr--;
         myGame.playerSpeedAdjust = (myGame.playerSpeedAdjust - myGame.speedUpCtr * myGame.speedUpRatio);
       }

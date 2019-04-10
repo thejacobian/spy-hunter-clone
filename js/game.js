@@ -7,7 +7,8 @@ class Game {
     this.bgTrack = bgTrack;
     this.bgAudio = new Audio(bgTrack);
     this.bgImage = bgImage;
-    this.level = 1;
+    this.level = 0;
+    this.levelUpFlag = true;
     this.seconds = 0;
     this.minutes = 0;
     this.stillTrainingFlag = true;
@@ -15,19 +16,19 @@ class Game {
     this.speedUpCtr = 0;
     this.speedUpRatio = 1.0;
     this.playerSpeedAdjust = 1;
-    this.dropEntitySpeedAdjust = 1;
     this.timePassing;
     this.message = '';
     this.$commsBar = $('.game-comms').children('h1').eq(0);
     this.type = type; //Alternating or Co-op
-
 
     // objects for handling population of screen
     this.$gameCanvas = $('#game-canvas');
     this.gridSize = 25;
     this.ctx = this.$gameCanvas[0].getContext('2d');
     this.leftShoulderArray = [];
+    this.leftShoulderTile;
     this.rightShoulderArray = [];
+    this.rightShoulderTile;
     this.potholeArray = [];
     this.civilianArray = [];
     this.obstacleArray = [];
@@ -58,7 +59,7 @@ class Game {
   printSomething() {
     console.log(this.message);
     $(this.$commsBar).text(this.message);
-  };
+  }
 
   initializePlayers() {
     this.playerOne = new Player ('Player 1', 'images/Spy_Car_1.png');
@@ -82,72 +83,129 @@ class Game {
     return Math.random() * (max - min) + min;
   }
 
-  // create new road shoulder obstacles
-  newShoulderTiles(type) {
+  // create new road left shoulder tile
+  newLeftShoulderTile() {
+    const newLeftShoulderY = this.leftShoulderArray[this.leftShoulderArray.length - 1].height; //+ 1;
 
-    const newLeftShoulderY = this.leftShoulderArray[this.leftShoulderArray.length - 1].height + 1;
-    const newRightShoulderY = this.rightShoulderArray[this.rightShoulderArray.length - 1].height + 1;
-    
-    // let randomVariability = this.getRandomFloat(0.7, 1.3);
-    // if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width >= 250 && randomVariability > 1) {
-    //   randomVariability = this.getRandomFloat(0.4, 0.9);
-    // } else if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width <= 50 && randomVariability < 1) {
-    //   randomVariability = this.getRandomFloat(1.1, 1.4);
-    // }
-    // const randomWidthSizeChange = randomVariability * this.rightShoulderArray[this.rightShoulderArray.length - 1].width;
-    // const newRightShoulderX = this.ctx.canvas.width - randomWidthSizeChange;
-    // let newShoulderTile = new Obstacle (type, 'left_shoulder_terrain.png', 0, -newLeftShoulderY, randomWidthSizeChange, 600, 'rgb(0, 255, 255)');
-    // this.leftShoulderArray.push(newShoulderTile);
-    // this.obstacleArray.push(newShoulderTile);
-    // newShoulderTile = new Obstacle (type, 'right_shoulder_terrain.png', newRightShoulderX, -newRightShoulderY, randomWidthSizeChange, 600, 'rgb(255, 255, 0)');
-    // this.rightShoulderArray.push(newShoulderTile); 
-    // this.obstacleArray.push(newShoulderTile);
-
+    // nudge the runaway shoulder tile sizes back towards desired size
     let randomVariability = this.getRandomFloat(0.6, 1.4);
-    if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width >= 250 && randomVariability > 1) {
+    if (this.leftShoulderArray[this.leftShoulderArray.length - 1].width >= 225 && randomVariability > 1) {
       randomVariability = this.getRandomFloat(0.4, 0.9);
-    } else if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width <= 50 && randomVariability < 1) {
+    } else if (this.leftShoulderArray[this.leftShoulderArray.length - 1].width <= 75 && randomVariability < 1) {
       randomVariability = this.getRandomFloat(1.1, 1.4);
     }
-    const randomWidthSizeChange = randomVariability * this.rightShoulderArray[this.rightShoulderArray.length - 1].width;
-    const newRightShoulderX = this.ctx.canvas.width - randomWidthSizeChange;
-    let newShoulderTile = new Obstacle (type, 'left_shoulder_terrain.png', 0, -newLeftShoulderY, randomWidthSizeChange, 600, 'rgb(0, 255, 255)');
-    this.leftShoulderArray.push(newShoulderTile);
-    this.obstacleArray.push(newShoulderTile);
-    newShoulderTile = new Obstacle (type, 'right_shoulder_terrain.png', newRightShoulderX, -newRightShoulderY, randomWidthSizeChange, 600, 'rgb(255, 255, 0)');
-    this.rightShoulderArray.push(newShoulderTile); 
-    this.obstacleArray.push(newShoulderTile);
+    // create an exit when wide right shoulder extends beyond center of road
+    if (this.rightShoulderTile.width > 300) {
+      randomVariability = this.getRandomFloat(0.2, 0.6);
+    }
 
-    myGame.leftShoulderRemovedFlag = false;
-    myGame.rightShoulderRemovedFlag = false;
+    const randomWidthSizeChange = randomVariability * this.leftShoulderArray[this.leftShoulderArray.length - 1].width;
+    this.leftShoulderTile = new Obstacle ('left shoulder', 'left_shoulder_terrain.png', 0, -newLeftShoulderY, randomWidthSizeChange, 600, 'rgb(0, 255, 255)');
+    this.leftShoulderArray.push(this.leftShoulderTile);
+    this.obstacleArray.push(this.leftShoulderTile);
+    this.leftShoulderRemovedFlag = false;
+
+    return this;
+  }
+
+  // create new road right shoulder tile
+  newRightShoulderTile() {
+    const newRightShoulderY = (this.rightShoulderArray[this.rightShoulderArray.length - 1].height) + 60 //+ 1;
+    const newRightShoulderHeight = 660;
+
+    // nudge the runaway shoulder tile sizes back towards desired size
+    let randomVariability = this.getRandomFloat(0.6, 1.4);
+    if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width >= 225 && randomVariability > 1) {
+      randomVariability = this.getRandomFloat(0.4, 0.9);
+    } else if (this.rightShoulderArray[this.rightShoulderArray.length - 1].width <= 75 && randomVariability < 1) {
+      randomVariability = this.getRandomFloat(1.1, 1.4);
+    }
+    // create an exit when wide left shoulder extends beyond center of road
+    if (this.leftShoulderTile.width > 300) {
+      randomVariability = this.getRandomFloat(0.2, 0.6);
+    }
+
+    const randomWidthSizeChange = randomVariability * this.rightShoulderArray[this.rightShoulderArray.length - 1].width;
+
+    const newRightShoulderX = this.ctx.canvas.width - randomWidthSizeChange;
+    this.rightShoulderTile = new Obstacle ('right shoulder', 'right_shoulder_terrain.png', newRightShoulderX, -newRightShoulderY, randomWidthSizeChange, newRightShoulderHeight, 'rgb(255, 255, 0)');
+    this.rightShoulderArray.push(this.rightShoulderTile); 
+    this.obstacleArray.push(this.rightShoulderTile);
+    this.rightShoulderRemovedFlag = false;
+
+    return this;
+  }
+
+  // create new porthole tile
+  newPotholeTile() {
+
+    // populate up to as many potholes as the game level
+    let randomNumPotholes = Math.floor(Math.random()* myGame.level) + 1;
+    let randomX;
+    let potholeTile;
+    for (let i = 0; i < randomNumPotholes; i++) {
+      randomX = this.getRandomInt(0, 575);
+      potholeTile = new Obstacle ('pothole', 'pothole_icon_1.png', randomX, 0, 25, 25, 'green');
+      this.potholeArray.push(potholeTile);
+      this.obstacleArray.push(potholeTile);
+    }
+    this.potholeRemovedFlag = false;
+
+    return this;
+  }
+
+  // create new civilian tile
+  newCivilianTile() {
+
+    // populate up to as many civilians as the game level
+    let randomNumCivilians = Math.floor(Math.random()* myGame.level) + 1;
+    let randomX;
+    let civilianTile;
+    if (this.civilianArray < 5) {
+      for (let i = 0; i < randomNumCivilians; i++) {
+        randomX = this.getRandomInt(myGame.leftShoulderTile.width, myGame.rightShoulderTile.x);
+        if (randomX < 345) {
+          civilianTile = new CivilianCar ('civilian car', 'civvie_car_icon.png', randomX, 0, 25, 50, 'red');
+        } else {
+          civilianTile = new CivilianBike ('civilian bike', 'civvie_bike_icon.png', randomX, 0, 25, 25, 'red');
+        }
+        this.civilianArray.push(civilianTile);
+        this.obstacleArray.push(civilianTile);
+      }
+      this.civilianRemovedFlag = false;
+    }
+
     return this;
   }
 
   initialState() {
 
-    // create first left road shoulder obstacle
-    const leftShoulderTile = new Obstacle ('left shoulder', 'left_shoulder_terrain.png', 0, 0, 100, 600, 'rgb(0, 255, 255)');
-    this.leftShoulderArray.push(leftShoulderTile);
-    this.obstacleArray.push(leftShoulderTile);
-    // create first right road shoulder obstacle
-    const rightShoulderTile = new Obstacle ('right shoulder', 'shoulder_terrain.png', 500, 0, 100, 600, 'rgb(0, 255, 255)')
-    this.rightShoulderArray.push(rightShoulderTile);
-    this.obstacleArray.push(rightShoulderTile);
-    this.newShoulderTiles(); // creates another right road shoulder and pushes into arrays
+    // create initial left road shoulder obstacle
+    this.leftShoulderTile = new Obstacle ('left shoulder', 'left_shoulder_terrain.png', 0, 0, 100, 600, 'rgb(0, 255, 255)');
+    this.leftShoulderArray.push(this.leftShoulderTile);
+    this.obstacleArray.push(this.leftShoulderTile);
+
+    // create initial right road shoulder obstacle
+    this.rightShoulderTile = new Obstacle ('right shoulder', 'shoulder_terrain.png', 500, 0, 100, 600, 'rgb(255, 255, 0)')
+    this.rightShoulderArray.push(this.rightShoulderTile);
+    this.obstacleArray.push(this.rightShoulderTile);
+
+    this.newLeftShoulderTile(); // creates another left road shoulder and pushes into arrays
+    this.newRightShoulderTile(); // creates another right road shoulder and pushes into arrays
 
     // create initial pothole obstacle
     const firstPothole = new Obstacle ('pothole', 'pothole_icon_1.png', 225, 225, 25, 25, 'green');
     this.potholeArray.push(firstPothole);
-    this.obstacleArray.push(firstPothole);
+    this.obstacleArray.push(firstPothole);    
+
+    // create initial civilian obstacle
+    const firstCivilian = new CivilianCar ('civilian car', 'civvie_icon.png', 300, 400, 25, 50, 'red');
+    this.civilianArray.push(firstCivilian);
+    this.obstacleArray.push(firstCivilian);
 
     // create initial enemy
     const firstEnemy = new Enemy ('basic badguy', 'baddie_icon_1.png');
-    this.enemyArray.push(firstEnemy);     
-
-    // create initial civilian obstacle
-    const firstCivilian = new CivilianCar ('civilian car', 'civvie_icon_1.png');
-    this.civilianArray.push(firstCivilian);
-    this.obstacleArray.push(firstCivilian);
+    this.enemyArray.push(firstEnemy); 
 
     // create spy car box
     //this.playersArray[0];

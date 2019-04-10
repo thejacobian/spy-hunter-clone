@@ -31,7 +31,7 @@ class Player {
     this.y = 500;
     this.width = 25;
     this.height = 50;
-    this.color = 'rgb(255, 255, 0)';
+    this.color = 'rgb(255, 255, 255)';
     this.direction = {
       up: false,
       right: false,
