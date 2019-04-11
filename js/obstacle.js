@@ -56,8 +56,8 @@ class CivilianBike extends Obstacle {
     this.hitpoints = 1;
     this.speed = 1.5;
     this.points = 200;
-    this.width = 8;
-    this.height = 15;
+    this.width = 10;
+    this.height = 20;
     this.color = 'orange';
   }
 }

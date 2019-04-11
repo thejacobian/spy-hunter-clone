@@ -124,7 +124,7 @@ class BulletproofBully extends Enemy {
     this.damage = 20;
     this.width = 30;
     this.height = 60;
-    this.color = 'navy';
+    this.color = 'fushsia';
   }
 
   // move(direction, velocity) {

@@ -130,7 +130,7 @@ class Game {
   // create new ice tile
   newIceTile() {
 
-    // populate up to as many ices as the game level
+    // populate up to as many ices as the game level (even appearing in the shoulder)
     let randomNumIces = Math.floor(Math.random()* myGame.level) + 1;
     let randomX;
     let iceTile;
@@ -148,15 +148,16 @@ class Game {
   // create new civilian tile
   newCivilianTile() {
 
-    // populate up to as many civilians as the game level
+    // populate up to as many civilians as the game level (appearing only in the road)
     const randomNumCivilians = Math.floor(Math.random()* myGame.level) + 1;
-    const randomChance = Math.random(); // used for probability if conditionals
+    let randomChance;
     let randomX;
     let civilianTile;
     if (this.civilianArray < 5) {
       for (let i = 0; i < randomNumCivilians; i++) {
+        randomChance = Math.random(); // used for probability if conditionals
         randomX = this.getRandomInt(myGame.leftShoulderTile.width + 50, myGame.rightShoulderTile.x - 50); 
-        if (randomChance < .6) {
+        if (randomChance < 0.6) {
           civilianTile = new CivilianCar ('civilian car', 'civilian_car_icon.png', randomX, 0);
         } else {
           civilianTile = new CivilianBike ('civilian bike', 'civilian_bike_icon.png', randomX, 0);
@@ -172,13 +173,14 @@ class Game {
 
   // create new enemy tile
   newEnemyTile() {
-    // populate up to as many enemys as the game level
+    // populate up to as many enemys as the game level (appearing only in the road)
     const randomNumEnemies = Math.floor(Math.random()* myGame.level) + 1;
-    const randomChance = Math.random(); // used for probability if conditionals
+    let randomChance;
     let randomX;
     let enemyTile;
     if (this.enemyArray < 5) {
       for (let i = 0; i < randomNumEnemies; i++) {
+        randomChance = Math.random(); // used for differing rate of enemy appearance below
         randomX = this.getRandomInt(myGame.leftShoulderTile.width + 50, myGame.rightShoulderTile.x - 50);
         if (randomChance < 0.01 * myGame.level) {
           enemyTile = new MasterOfTheSkies ('master of the skies', 'master_of_the_skies_icon.png', randomX, 0);
@@ -199,7 +201,12 @@ class Game {
     return this;
   }
 
+  //create initial visibile game board (which will push first/second items into arrays and act as catalyst)
   initialState() {
+
+    // set training mode for first few seconds of initial state
+    $('.high-scores h1').text('TRAINING MODE');
+    $('.high-scores h1').css('color', 'red');
 
     // create initial left road shoulder obstacle
     this.leftShoulderTile = new Obstacle ('left shoulder', 'left_shoulder_terrain.png', 0, 0, 100, 600, 'rgb(255, 0, 255)');
@@ -228,13 +235,14 @@ class Game {
     const firstEnemy = new Enemy ('basic enemy', 'basic_enemy_icon.png', 250, 0);
     this.enemyArray.push(firstEnemy); 
 
-    // create spy car box
+    // the initial playe spy car is known and will be drawn in the renderCanvas() animation
     //this.playersArray[0];
 
     // draw visual layout
     renderCanvas(this.ctx);
   }
 
+  // pause function from button click
   pause() {
     this.bgAudio.pause();
     $('#start').prop('disabled', false);
@@ -259,6 +267,7 @@ class Game {
     }
   }
 
+  // start method from button clicks (called by NEXT PLAYER)
   start() {
     // show initial startup message an prologue
     if (this.showStartupMsgFlag) {
@@ -276,13 +285,9 @@ class Game {
       }
       this.showStartupMsgFlag = false;
     }
-
-    // start playing background audio on a loop;
-    this.bgAudio.loop = true;
-    this.bgAudio.play();
   
     // display initial message
-    this.message = `Special Agent ${this.activePlayer.name} reporting for duty. In pursuit of target...`;
+    this.message = `Special Agent ${this.activePlayer.name} reporting for duty. In pursuit of enemy threats...`;
     $(this.$commsBar).text(this.message);
     console.log(this.message);
 
@@ -298,9 +303,12 @@ class Game {
     return this;
   }
 
+  // nextPlayer method from button click
   nextPlayer() {
     this.message = `It's the next player's turn. The fate of the world is in your hands, good luck!`;
     this.printSomething(this.message);
+    myGame.$commsBar.css('color', 'white');
+    // clear the setInterval clock for the next player.
     clearInterval(this.timePassing);
 
     // Reset variables that reset between player switches
@@ -313,7 +321,7 @@ class Game {
     this.speedUpCtr = 0;
     this.speedUpRatio = 1.0;
     this.playerSpeedAdjust = 1;
-    this.timePassing;
+    // this.timePassing = 0;
     this.message = '';
 
     // Reset objects for managing population of screen
@@ -326,10 +334,7 @@ class Game {
     this.obstacleArray = [];
     this.enemyArray = [];
     this.playersArray = [];
-    this.playerOne = new Player ('Player 1', 'images/Spy_Car_1.png');
-    this.playerTwo = new Player ('Player 2', 'images/Spy_Car_2.png');
-    this.activePlayer = this.playerOne;
-    this.requestID;
+    this.requestID = 0;
   
     // Reset initial Flags for entities for populating later
     this.enemyRemovedFlag = false;
@@ -341,15 +346,14 @@ class Game {
     // Reset animation fps and speed up and down key handling
     this.animationRunningFlag = false;
     this.fps = 55;
-    this.fpsInterval
-    this.startTime;
-    this.then
-    this.now
-    this.elapsed;
-    this.xFrame = 0;
+    this.fpsInterval = 0;
+    this.startTime = 0;
+    this.then = 0;
+    this.now = 0;
+    this.elapsed = 0;
+    // this.xframe is not cleared to 0 here as we use it before we clear in initializePlayer()
 
-    // Initialize for Player 2's turn.
-    this.initializePlayers();
+    // Initialize for Player 2's turn, which will be initialized when we call start() after returning
     this.activePlayer = this.playerTwo;
 
     // Clear some html counters and css from Player 1.
@@ -363,11 +367,10 @@ class Game {
     $('.oil-meter').css('color', 'white');
     $('.lives-meter').text(`${this.activePlayer.lives}`);
     $('.lives-meter').css('color', 'white');
-    $('.player-name').text('PL2');
+    $('.high-scores h1').text('TRAINING MODE');
+    $('.high-scores h1').css('color', 'red');
 
-    // Start the game.
-    this.start();
-
+    // starting the game happens after we return in start() button click event
     return this;
   }
 }

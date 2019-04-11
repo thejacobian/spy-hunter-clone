@@ -1,17 +1,12 @@
 // eslint-disable-next-line no-undef
 console.log('Up and running\n\n\n\n\n\n\n');
 
-// Global Variables
+// Global myGame Object instantiated from Class
 let myGame = new Game('Alternating', 'audio/01-SpyHunter-A8-SpyHunterTheme.ogg', '../images/spy-hunter_title_dos.png');
 
-// play any audio file function
-const playAudio = (sound) => {
-  const playSound = new Audio(sound);
-  playSound.play();
-  return playSound;
-};
-
 const secondsGoUp = () => {
+
+  //increment the seconds
   myGame.seconds++;
   
   // format the clock with minutes and seconds
@@ -34,8 +29,18 @@ const secondsGoUp = () => {
     $('.lives-meter').css('color', 'red');
   }
 
-  // do stuff every 20 seconds like increment the level and therefore the number and type of badguys
-  if (myGame.seconds !== 0 && myGame.seconds % 20 === 0) {
+  // format missiles meter red if down to 1
+  if (myGame.activePlayer.lives <= 3) {
+    $('.missiles-meter').css('color', 'red');
+  }
+
+  // format oils meter red if down to 1
+  if (myGame.activePlayer.lives <= 3) {
+    $('.oils-meter').css('color', 'red');
+  }
+
+  // do stuff every 30 secs like increment the level and therefore the number and type of badguys
+  if (myGame.seconds % 30 === 0) {
     if (myGame.levelUpFlag) {
       myGame.level++;
       $('.level-meter').text(myGame.level);
@@ -62,32 +67,51 @@ const secondsGoUp = () => {
       }
 
       myGame.message = `Congratulations! You have reached level ${myGame.level}!`;
+      $('.level-meter').text(myGame.level);
+      myGame.$commsBar.css('color', 'yellow');
       myGame.printSomething(myGame.message);
-
+      
       myGame.levelUpFlag = false;
     }
   }
 
-  // do stuff every 21 seconds like reset the levelUpFlag
-  if (myGame.seconds !== 0 && myGame.seconds % 21 === 0) {
+  // do stuff every 31 seconds like reset the levelUpFlag
+  if (myGame.seconds % 31 === 0) {
     myGame.levelUpFlag = true;
   }
 
-  // handle game state transition for things that happen at 0 min 1 seconds
-  if (myGame.minutes === 0 && myGame.seconds === 1) {
+  // disable classic TRAINING MODE at 0 min 15 seconds
+  if (myGame.minutes === 0 && myGame.seconds === 15) {
     //disable unlimited retry "training" mode and start losing lives
     myGame.stillTrainingFlag = false;
-  }
-
-  // handle game state transition for things that happen at 3 mins
-  if (myGame.minutes === 3 && myGame.seconds === 0) {
-    //perhaps we will update the level here???
+    $('.high-scores h1').text('HIGH SCORES');
+    $('.high-scores h1').css('color', 'white');
   }
 
   // handle awarding an extra life every 1000 points scaling with level.
-  if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (1000 * myGame.level) === 0) {
+  if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (5000 * myGame.level) === 0) {
     myGame.activePlayer.lives++;
+    $('.lives-meter').text(myGame.activePlayer.lives);
     myGame.message = `You have earned an extra life! Number of Lives remaining: ${myGame.activePlayer.lives}`;
+    myGame.$commsBar.css('color', 'yellow');
+    myGame.printSomething(myGame.message);
+  }
+
+  // handle awarding extra Oil Slicks every 2000 points scaling with level.
+  if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (7500 * myGame.level) === 0) {
+    myGame.activePlayer.oils += 5;
+    $('.oil-meter').text(myGame.activePlayer.oils);
+    myGame.message = `You have earned an extra 5 oil slicks! Number of Oil Slicks remaining: ${myGame.activePlayer.oils}`;
+    myGame.$commsBar.css('color', 'yellow');
+    myGame.printSomething(myGame.message);
+  }
+
+  // handle awarding extra Missiles every 3000 points scaling with level.
+  if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (10000 * myGame.level) === 0) {
+    myGame.activePlayer.missiles += 5;
+    $('.missile-meter').text(myGame.activePlayer.missiles);
+    myGame.message = `You have earned an extra 5 missiles! Number of Missiles remaining: ${myGame.activePlayer.missiles}`;
+    myGame.$commsBar.css('color', 'yellow');    
     myGame.printSomething(myGame.message);
   }
 
@@ -95,28 +119,21 @@ const secondsGoUp = () => {
   if (myGame.activePlayer.lives <= 0) {
     // change player image to dead image/ or explosion animation
 
-    // handle custom ending depending on level achieved
-    if (myGame.level < 5) {
-      myGame.message = `Master Spy Driver ${myGame.activePlayer.name} has died and the world was obliterated in a nuclear blast. Game Over!`;
-    } else {
-      myGame.message = `Despite a valiant effort ${myGame.activePlayer.name} has died and the world was obliterated in a nuclear blast. Game Over!`;
-    }
-    myGame.printSomething(myGame.message);
-    //alert(myGame.message);
-    clearInterval(myGame.timePassing);
-    myGame.timePassing = 0;
-
-    // update high score leaderboard.
+    // update high score leaderboard and display custom game over message
     if (myGame.activePlayer.name === myGame.playerOne.name) {
+      myGame.message = `Master Spy Driver ${myGame.activePlayer.name} has died, refresh to play again as 1P or click NEXT PLAYER for 2P!`;
       myGame.$myPlayerScoreLoc = $('#player-one-score');
+      myGame.printSomething(myGame.message);
     } else {
+      myGame.message = `Despite a team effort ${myGame.activePlayer.name} has also died and the world was obliterated in a nuclear blast. Game Over! Refresh.`;
       myGame.$myPlayerScoreLoc = $('#player-two-score');
+      myGame.printSomething(myGame.message);
     }
     if (Number(myGame.$myPlayerScoreLoc.text()) < myGame.activePlayer.score) {
       myGame.$myPlayerScoreLoc.text(myGame.activePlayer.score);
     }
-   
-    $('#stop').click();
+    myGame.$commsBar.css('color', 'red');
+    $('#pause').click();
     $('#start').prop('disabled', true);
   }
 };
@@ -236,6 +253,7 @@ const animate = () => {
           myGame.enemyArray.forEach(function(enemy) {
             if (weapon.checkCollision(enemy)) {
               myGame.message = `${weapon.type} has hit ${enemy.type} for ${weapon.damage}!`
+              myGame.$commsBar.css('color', 'white');
               myGame.printSomething(myGame.message);
               enemy.hitpoints -= weapon.damage;
               if (enemy.hitpoints < 0) {
@@ -251,6 +269,7 @@ const animate = () => {
           myGame.civilianArray.forEach(function(civilian) {
             if (weapon.checkCollision(civilian)) {
               myGame.message = `${weapon.type} has hit ${civilian.type} for ${weapon.damage}!`
+              myGame.$commsBar.css('color', 'white');
               myGame.printSomething(myGame.message)
               civilian.alive = false;
               myGame.civilianRemovedFlag = true;
@@ -265,20 +284,24 @@ const animate = () => {
         // check for player collision with obstacle
         if (myGame.activePlayer.checkCollision(obstacle)) {
           if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
-            myGame.printSomething(`Collision with ${obstacle.type}!`);
+            myGame.message = `Player took some damage from collision with ${obstacle.type}!`;
+            myGame.$commsBar.css('color', 'red');
+            myGame.printSomething(myGame.message);
             myGame.activePlayer.score -= obstacle.damage;
             $('.score-meter').text(myGame.activePlayer.score);
             myGame.activePlayer.hitpoints -= obstacle.damage;
             obstacle.hitpoints -= myGame.activePlayer.collisionDamage;
             myGame.activePlayer.justDamagedFlag = true;
-            setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 3000);
+            setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 2000); //invincible for 2 secs
           }
         }
         // check for enemy collision with obstacle
         myGame.enemyArray.forEach(function(enemy) {
           if (enemy.checkCollision(obstacle)) {
             if (!enemy.justDamagedFlag) {
-              myGame.printSomething(`${enemy.type} collided with ${obstacle.type}!`);
+              myGame.message = `${enemy.type} collided with ${obstacle.type}!`;
+              myGame.$commsBar.css('color', 'white');
+              myGame.printSomething(myGame.message);
               if (enemy.type === 'bulletproof bully') {
                 enemy.hitpoints -= 50000000;
               } else if (enemy.type === 'master of the skies') {
@@ -290,7 +313,7 @@ const animate = () => {
               $('.score-meter').text(myGame.activePlayer.score);
               obstacle.hitpoints -= enemy.damage;
               enemy.justDamagedFlag = true;
-              setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 3000);
+              setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 1000); //invincible for 1 secs
             }
           }
         });
@@ -305,36 +328,42 @@ const animate = () => {
       myGame.enemyArray.forEach(function(enemy) {
         if (myGame.activePlayer.checkCollisionDirection(enemy)) {
           if (!myGame.stillTrainingFlag && !myGame.activePlayer.justDamagedFlag) {
-            myGame.printSomething(`Collision with ${enemy.type} from ${myGame.activePlayer.colDir}!`);
             if (enemy.type === 'bulletproof bully') {
               enemy.hitpoints -= 50000000;
               myGame.activePlayer.score += enemy.points;
             } else {
               myGame.activePlayer.score -= (enemy.damage * myGame.playerSpeedAdjust);
+              myGame.activePlayer.hitpoints -= enemy.damage;
             }
+            myGame.message = `Player took some damage from collision with ${enemy.type}!`
+            myGame.$commsBar.css('color', 'red');
+            myGame.printSomething(myGame.message);
+            
             $('.score-meter').text(myGame.activePlayer.score);
-            myGame.activePlayer.hitpoints -= enemy.damage;
             enemy.hitpoints -= myGame.activePlayer.collisionDamage;
             myGame.activePlayer.justDamagedFlag = true;
 
-            // handle collision bounce effect for enemies that are not tireslasher or master of the skies
-            if (enemy.type !== 'tireslasher' && enemy.type !== 'master of the skies') {
+            // handle collision bounce effect for enemies that are not the helicopter (master of the skies)
+            if (enemy.type !== 'master of the skies') {
               if (myGame.activePlayer.colDir === 't') {
-                myGame.activePlayer.y += 100;
+                if (myGame.activePlayer.y < 490) {
+                  myGame.activePlayer.y += 100;
+                }
                 enemy.y -= 125;
               } else if (myGame.activePlayer.colDir === 'r') {
                 myGame.activePlayer.x -= 100;
                 enemy.x += 125;
               } else if (myGame.activePlayer.colDir === 'b') {
-                myGame.activePlayer.y -= 100;
+                if (myGame.activePlayer.y > 110) {
+                  myGame.activePlayer.y -= 100;
+                }
                 enemy.y += 125;
               } else if (myGame.activePlayer.colDir === 'l') {
                 myGame.activePlayer.x += 100;
                 enemy.x -= 125;
               }
             }
-
-            setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 500);
+            setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 500); //can't bounce for 0.5 secs
           }
           // set enemy's dead flag if hp below 0
           if (enemy.hitpoints < 0) {
@@ -407,6 +436,7 @@ const animate = () => {
         $('.lives-meter').text(myGame.activePlayer.lives);
         myGame.activePlayer.hitpoints = 100;
         myGame.message = `You lost a life! Lives remaining: ${myGame.activePlayer.lives}`;
+        myGame.$commsBar.css('color', 'red');
         myGame.printSomething(myGame.message);
       }
     }
@@ -415,9 +445,15 @@ const animate = () => {
 
 // do stuff that happens on start button click
 $('#start').on('click', () => {
-  myGame.bgAudio = playAudio(myGame.bgTrack);
+  // start playing background audio on a loop;
+  myGame.bgAudio = new Audio(myGame.bgTrack);
+  myGame.bgAudio.loop = true;
+  myGame.bgAudio.play();
+  // jump to myGame.start()method for additional initializations
   myGame.start();
+  // setInterval timer for every second to handle some game state transitions
   myGame.timePassing = setInterval(secondsGoUp, 1000);
+  // reset xFrame counter for FPS downscaler (if desired) and start animation
   myGame.xFrame = 0;
   startAnimation();
 });
@@ -447,14 +483,12 @@ $('#drop-oil').on('click', () => {
 
 // do stuff that happens on next-player button click
 $('#next-player').on('click', () => {
-    $('#player-name').append('<h2/>');
-    $('#player-name.h2').text(myGame.activePlayer.score);
     myGame.nextPlayer();
     myGame.bgAudio.pause();
     myGame.bgAudio.currentTime = 0;
-    //myGame = new Game('Alternating', 'audio/01-SpyHunter-A8-SpyHunterTheme.ogg', 'images/spy-hunter_title_dos.png');
-    //$('#pause').click();
     $('#start').click();
+    // change button states
+    $('#next-player').prop('disabled', true);
 });
 
 $(document).on('keydown', (e) => {
