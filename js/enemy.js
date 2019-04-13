@@ -95,7 +95,7 @@ class Tireslasher extends Enemy {
   constructor(type, icon, startX, startY) {
     super('tireslasher', icon, startX, startY);
     this.points = 1000;
-    this.hitpoints = 100;
+    this.hitpoints = 99;
     this.speed = 1.5;
     this.damage = 100;
     this.width = 25;
@@ -124,7 +124,7 @@ class BulletproofBully extends Enemy {
     this.damage = 20;
     this.width = 30;
     this.height = 60;
-    this.color = 'fushsia';
+    this.color = 'grey';
   }
 
   // move(direction, velocity) {
@@ -143,7 +143,7 @@ class DoubleBarrelAction extends Enemy {
   constructor(type, icon, startX, startY) {
     super('doublebarrel action', icon, startX, startY);
     this.points = 2000;
-    this.hitpoints = 500;
+    this.hitpoints = 499;
     this.speed = 1.5;
     this.damage = 50;
     this.width = 30;
@@ -167,12 +167,13 @@ class MasterOfTheSkies extends Enemy {
   constructor(type, icon, startX, startY) {
     super('master of the skies', icon, startX, startY);
     this.points = 2500;
-    this.hitpoints = 1000;
-    this.speed = 2;
+    this.hitpoints = 999;
+    this.speed = 0.75;
     this.damage = 100;
     this.width = 75;
     this.height = 75;
     this.color = 'olive';
+    this.sound = 'audio/Helicopter.mp3';
   }
 
   // move(direction, velocity) {

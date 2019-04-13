@@ -45,8 +45,9 @@ const renderCanvas = (ctx) => {
 
     // // draw grid for visual layout
     // makeGrid(ctx, myGame.gridSize, 'rgb(255, 255, 255)', 2);
-    //     // draw center vertical line
-    // makeLine(ctx, 300, 0, 300, 600, 'rgb(255, 0, 255)', 2)
+    // draw center vertical line
+    // ctx.setLineDash([5, 15]);
+    // makeLine(ctx, 300, 0, 300, 600, 'rgba(255, 255, 255, 0.8)', 2);
     // // draw center horizontal line
     // makeLine(ctx, 0, 300, 600, 300, 'rgb(255, 0, 255)', 2)
   };

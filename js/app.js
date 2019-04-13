@@ -1,8 +1,11 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable space-before-function-paren */
+/* eslint-disable prefer-arrow-callback */
 // eslint-disable-next-line no-undef
 console.log('Up and running\n\n\n\n\n\n\n');
 
 // Global myGame Object instantiated from Class
-let myGame = new Game('Alternating', 'audio/01-SpyHunter-A8-SpyHunterTheme.ogg', '../images/spy-hunter_title_dos.png');
+let myGame = new Game('Alternating', 'audio/Spy_Theme.mp3', 'images/spy-hunter_title_dos.png');
 
 const secondsGoUp = () => {
 
@@ -71,6 +74,10 @@ const secondsGoUp = () => {
       myGame.$commsBar.css('color', 'yellow');
       myGame.printSomething(myGame.message);
       
+      // handle level up sound effect
+      const levelUpSound = new Audio('audio/Metroid_Door.mp3');
+      levelUpSound.play();
+
       myGame.levelUpFlag = false;
     }
   }
@@ -91,6 +98,11 @@ const secondsGoUp = () => {
   // handle awarding an extra life every 1000 points scaling with level.
   if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (5000 * myGame.level) === 0) {
     myGame.activePlayer.lives++;
+
+    // handle extra life sound effect
+    const gainLifeSound = new Audio('audio/Gain_Life.mp3');
+    gainLifeSound.play();
+
     $('.lives-meter').text(myGame.activePlayer.lives);
     myGame.message = `You have earned an extra life! Number of Lives remaining: ${myGame.activePlayer.lives}`;
     myGame.$commsBar.css('color', 'yellow');
@@ -125,7 +137,7 @@ const secondsGoUp = () => {
       myGame.$myPlayerScoreLoc = $('#player-one-score');
       myGame.printSomething(myGame.message);
     } else {
-      myGame.message = `Despite a team effort ${myGame.activePlayer.name} has also died and the world was obliterated in a nuclear blast. Game Over! Refresh.`;
+      myGame.message = `Master Spy Driver ${myGame.activePlayer.name} has also died and the world was obliterated in a nuclear blast. Game Over!`;
       myGame.$myPlayerScoreLoc = $('#player-two-score');
       myGame.printSomething(myGame.message);
     }
@@ -135,6 +147,7 @@ const secondsGoUp = () => {
     myGame.$commsBar.css('color', 'red');
     $('#pause').click();
     $('#start').prop('disabled', true);
+    $('#next-player').prop('disabled', false);
   }
 };
 
@@ -238,7 +251,7 @@ const animate = () => {
         }
       });
 
-      //move and draw all weapon projectiles on screen
+      // move and draw all weapon projectiles on screen
       myGame.activePlayer.weaponsArray.forEach(function(weapon) {
         // flag for removal any weapons no longer on the screen
         if (weapon.y < 0) {
@@ -247,7 +260,7 @@ const animate = () => {
           // otherwise move the obstacle
           weapon.move(myGame.ctx);
         }
-        //check if weapon still is still "alive" and can do damage
+        // check if weapon still is still "alive" and can do damage
         if (weapon.alive) {
           // check for projectile collision with enemy
           myGame.enemyArray.forEach(function(enemy) {
@@ -274,7 +287,7 @@ const animate = () => {
               civilian.alive = false;
               myGame.civilianRemovedFlag = true;
               weapon.alive = false;
-            }  
+            }
           });
         }
       });
@@ -292,7 +305,16 @@ const animate = () => {
             myGame.activePlayer.hitpoints -= obstacle.damage;
             obstacle.hitpoints -= myGame.activePlayer.collisionDamage;
             myGame.activePlayer.justDamagedFlag = true;
-            setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 2000); //invincible for 2 secs
+
+            let obstacleSound; // handle obstacle sound effects
+            if (obstacle.type === 'ice') {
+              obstacleSound = new Audio('audio/Ice.mp3');
+            } else {
+              obstacleSound = new Audio('audio/Car_Crash.mp3');
+            }
+            obstacleSound.play();
+
+            setTimeout(function() { myGame.activePlayer.justDamagedFlag = false; }, 2000); //invincible for 2 secs
           }
         }
         // check for enemy collision with obstacle
@@ -313,7 +335,16 @@ const animate = () => {
               $('.score-meter').text(myGame.activePlayer.score);
               obstacle.hitpoints -= enemy.damage;
               enemy.justDamagedFlag = true;
-              setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 1000); //invincible for 1 secs
+
+              let obstacleSound; // handle obstacle sound effects
+              if (obstacle.type === 'ice') {
+                obstacle.Sound = new Audio('audio/Ice.mp3');
+              } else {
+                obstacleSound = new Audio('audio/Car_Crash.mp3');
+              }
+              obstacleSound.play();
+
+              setTimeout(function() { myGame.activePlayer.justDamagedFlag = false; }, 1000); //invincible for 1 secs
             }
           }
         });
@@ -362,8 +393,12 @@ const animate = () => {
                 myGame.activePlayer.x += 100;
                 enemy.x -= 125;
               }
+
+              // handle enemy scrape sound effect
+              const scrape = new Audio('audio/Car_Scrape.mp3');
+              scrape.play();
             }
-            setTimeout(function(){ myGame.activePlayer.justDamagedFlag = false; }, 500); //can't bounce for 0.5 secs
+            setTimeout(function() { myGame.activePlayer.justDamagedFlag = false; }, 500); //can't bounce for 0.5 secs
           }
           // set enemy's dead flag if hp below 0
           if (enemy.hitpoints < 0) {
@@ -371,6 +406,9 @@ const animate = () => {
             $('.score-meter').text(myGame.activePlayer.score);
             enemy.alive = false;
             myGame.enemyRemovedFlag = true;
+            // handle enemy explosion sound effect
+            const explosion = new Audio('audio/Explosion.mp3');
+            explosion.play();
           }
         }
       });
@@ -406,7 +444,7 @@ const animate = () => {
       myGame.civilianArray = myGame.civilianArray.filter(function(civilian) {
         return civilian.alive === true;
       });
-      // add a new ice if one was removed from the array offscreen
+      // add a new civilian if one was removed from the array offscreen
       if (myGame.civilianRemovedFlag) {
         myGame.newCivilianTile();
       }
@@ -436,6 +474,9 @@ const animate = () => {
         $('.lives-meter').text(myGame.activePlayer.lives);
         myGame.activePlayer.hitpoints = 100;
         myGame.message = `You lost a life! Lives remaining: ${myGame.activePlayer.lives}`;
+        // handle lose life sound effect
+        const loseLifeSound = new Audio('audio/Lose_Life.mp3');
+        loseLifeSound.play();
         myGame.$commsBar.css('color', 'red');
         myGame.printSomething(myGame.message);
       }
@@ -522,6 +563,9 @@ $(document).on('keyup', (e) => {
       if (myGame.animationRunningFlag && myGame.speedUpCtr >= 0 && myGame.speedUpCtr < 4) {
         myGame.playerSpeedAdjust = (myGame.playerSpeedAdjust + myGame.speedUpCtr * myGame.speedUpRatio);
         myGame.speedUpCtr++;
+        myGame.brakeSound.pause();
+        myGame.speedSound.pause();
+        myGame.speedSound.play();
       }
     }
 
@@ -530,6 +574,9 @@ $(document).on('keyup', (e) => {
       if (myGame.animationRunningFlag && myGame.speedUpCtr > 0 && myGame.speedUpCtr <= 4) {
         myGame.speedUpCtr--;
         myGame.playerSpeedAdjust = (myGame.playerSpeedAdjust - myGame.speedUpCtr * myGame.speedUpRatio);
+        myGame.speedSound.pause();
+        myGame.brakeSound.pause();
+        myGame.brakeSound.play();
       }
     }
 

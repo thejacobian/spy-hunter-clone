@@ -4,16 +4,17 @@
 
 // Basic gun weapon shoots in front of Player vehicle.
 class Weapon {
-  constructor(type, icon) {
+  constructor(type, icon, sound) {
     this.type = type;
     this.icon = icon;
     this.damage = 25;
     this.speed = 10;
     this.alive = true;
+    this.sound = sound;
 
     // canvas render properties
     this.x = myGame.activePlayer.x + 11; // start bullets in front of car
-    this.y = myGame.activePlayer.y - 10 ; // start bullets in front of car
+    this.y = myGame.activePlayer.y - 10; // start bullets in front of car
     this.width = 2;
     this.height = 10;
     this.color = 'orange';
@@ -49,8 +50,8 @@ class Weapon {
 
 // Extended  weapon to implement missile
 class Missile extends Weapon {
-  constructor(type, icon) {
-    super('missile', icon);
+  constructor(type, icon, sound) {
+    super('missile', icon, sound);
     this.color = 'purple';
     this.damage = 200;
     this.speed = 18;
@@ -65,9 +66,9 @@ class Missile extends Weapon {
 
 // Extended weapon to implement oil slick
 class OilSlick extends Weapon {
-  constructor(type, icon) {
-    super('oil slick', icon);
-    this.color = 'gray';
+  constructor(type, icon, sound) {
+    super('oil slick', icon, sound);
+    this.color = 'black';
     this.damage = 75;
     this.speed = -1;
 
@@ -78,7 +79,12 @@ class OilSlick extends Weapon {
     this.height = 20;
   }
 
-    move(ctx) {
+  // canvas draw method
+  draw(ctx) {
+    makeRectangle(ctx, this.x, this.y, this.width, this.height, 'white', this.color, 1)
+  }
+
+  move(ctx) {
     // clear it first, then move it.
     renderCanvas(ctx); //, this.x, this.y, this.width, this.height);
     // move it if it should be moving

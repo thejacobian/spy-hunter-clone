@@ -8,6 +8,8 @@ class Game {
     this.type = type; //Alternating or Co-op
     this.bgTrack = bgTrack;
     this.bgImage = bgImage;
+    this.speedSound = new Audio('audio/Shift_Gears.mp3');
+    this.brakeSound = new Audio('audio/Car_Brake.mp3');
     this.$commsBar = $('.game-comms').children('h1').eq(0);
     this.$gameCanvas = $('#game-canvas');
     this.$myPlayerScoreLoc = $('#player-one-score');
@@ -136,7 +138,7 @@ class Game {
     let iceTile;
     for (let i = 0; i < randomNumIces; i++) {
       randomX = this.getRandomInt(0, 575);
-      iceTile = new Obstacle ('ice', 'ice_icon_1.png', randomX, 0, 25, 25, 'teal');
+      iceTile = new Obstacle ('ice', 'ice_icon_1.png', randomX, 0, 25, 25, 'aqua');
       this.iceArray.push(iceTile);
       this.obstacleArray.push(iceTile);
     }
@@ -184,6 +186,8 @@ class Game {
         randomX = this.getRandomInt(myGame.leftShoulderTile.width + 50, myGame.rightShoulderTile.x - 50);
         if (randomChance < 0.01 * myGame.level) {
           enemyTile = new MasterOfTheSkies ('master of the skies', 'master_of_the_skies_icon.png', randomX, 0);
+          const helicopterSound = new Audio(enemyTile.sound);
+          enemyTile.play();
         } else if (randomChance < 0.02 * myGame.level) {
           enemyTile = new DoubleBarrelAction ('doublebarrel action', 'doublebarel_action_icon.png', randomX, 0);
         } else if (randomChance < 0.08 * myGame.level) {
@@ -222,7 +226,7 @@ class Game {
     this.newRightShoulderTile(); // creates another right road shoulder and pushes into arrays
 
     // create initial ice obstacle
-    const firstIce = new Obstacle ('ice', 'ice_icon.png', 225, 225, 25, 25, 'teal');
+    const firstIce = new Obstacle ('ice', 'ice_icon.png', 225, 225, 25, 25, 'aqua');
     this.iceArray.push(firstIce);
     this.obstacleArray.push(firstIce);    
 
@@ -293,6 +297,7 @@ class Game {
 
     // change button states
     $('#start').prop('disabled', true);
+    $('#pause').prop('disabled', false);
     $('#shoot-gun').prop('disabled', false);
     $('#fire-missile').prop('disabled', false);
     $('#drop-oil').prop('disabled', false);
