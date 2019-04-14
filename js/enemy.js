@@ -9,7 +9,7 @@ class Enemy {
     this.icon = icon;
     this.points = 500;
     this.hitpoints = 49;
-    this.speed = 1.25;
+    this.speed = 1.10;
     this.damage = 20;
     this.weaponsArr = [];
     this.actionsArr = [];
@@ -90,14 +90,14 @@ class Enemy {
   }
 }
 
-// Extended tire slasher car class that must be shot.
+// Extended tire slasher car class that should not be rammed
 class Tireslasher extends Enemy {
   constructor(type, icon, startX, startY) {
     super('tireslasher', icon, startX, startY);
     this.points = 1000;
     this.hitpoints = 99;
-    this.speed = 1.5;
-    this.damage = 100;
+    this.speed = 0.75;
+    this.damage = 99;
     this.width = 25;
     this.height = 50;
     this.color = 'lime';
@@ -120,7 +120,7 @@ class BulletproofBully extends Enemy {
     super('bulletproof bully', icon, startX, startY);
     this.points = 1500;
     this.hitpoints = 99999999;
-    this.speed = 1.75;
+    this.speed = 1.5;
     this.damage = 20;
     this.width = 30;
     this.height = 60;
@@ -144,7 +144,7 @@ class DoubleBarrelAction extends Enemy {
     super('doublebarrel action', icon, startX, startY);
     this.points = 2000;
     this.hitpoints = 499;
-    this.speed = 1.5;
+    this.speed = 1.25;
     this.damage = 50;
     this.width = 30;
     this.height = 90;
@@ -166,14 +166,13 @@ class DoubleBarrelAction extends Enemy {
 class MasterOfTheSkies extends Enemy {
   constructor(type, icon, startX, startY) {
     super('master of the skies', icon, startX, startY);
-    this.points = 2500;
+    this.points = 5000;
     this.hitpoints = 999;
-    this.speed = 0.75;
+    this.speed = 0.5;
     this.damage = 100;
     this.width = 75;
     this.height = 75;
     this.color = 'olive';
-    this.sound = 'audio/Helicopter.mp3';
   }
 
   // move(direction, velocity) {

@@ -95,7 +95,7 @@ const secondsGoUp = () => {
     $('.high-scores h1').css('color', 'white');
   }
 
-  // handle awarding an extra life every 1000 points scaling with level.
+  // handle awarding an extra life every 5000 points scaling with level.
   if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (5000 * myGame.level) === 0) {
     myGame.activePlayer.lives++;
 
@@ -109,7 +109,7 @@ const secondsGoUp = () => {
     myGame.printSomething(myGame.message);
   }
 
-  // handle awarding extra Oil Slicks every 2000 points scaling with level.
+  // handle awarding extra Oil Slicks every 7500 points scaling with level.
   if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (7500 * myGame.level) === 0) {
     myGame.activePlayer.oils += 5;
     $('.oil-meter').text(myGame.activePlayer.oils);
@@ -118,7 +118,7 @@ const secondsGoUp = () => {
     myGame.printSomething(myGame.message);
   }
 
-  // handle awarding extra Missiles every 3000 points scaling with level.
+  // handle awarding extra Missiles every 10000 points scaling with level.
   if (myGame.activePlayer.score > 0 && myGame.activePlayer.score % (10000 * myGame.level) === 0) {
     myGame.activePlayer.missiles += 5;
     $('.missile-meter').text(myGame.activePlayer.missiles);
@@ -270,7 +270,7 @@ const animate = () => {
               myGame.printSomething(myGame.message);
               enemy.hitpoints -= weapon.damage;
               if (enemy.hitpoints < 0) {
-                myGame.activePlayer.score += (enemy.points * myGame.playerSpeedAdjust);
+                myGame.activePlayer.score += Math.floor(enemy.points * myGame.playerSpeedAdjust / 500) * 500;
                 $('.score-meter').text(myGame.activePlayer.score);
                 enemy.alive = false;
                 myGame.enemyRemovedFlag = true;
@@ -300,7 +300,7 @@ const animate = () => {
             myGame.message = `Player took some damage from collision with ${obstacle.type}!`;
             myGame.$commsBar.css('color', 'red');
             myGame.printSomething(myGame.message);
-            myGame.activePlayer.score -= obstacle.damage;
+            myGame.activePlayer.score -= obstacle.points;
             $('.score-meter').text(myGame.activePlayer.score);
             myGame.activePlayer.hitpoints -= obstacle.damage;
             obstacle.hitpoints -= myGame.activePlayer.collisionDamage;
@@ -338,7 +338,7 @@ const animate = () => {
 
               let obstacleSound; // handle obstacle sound effects
               if (obstacle.type === 'ice') {
-                obstacle.Sound = new Audio('audio/Ice.mp3');
+                obstacleSound = new Audio('audio/Ice.mp3');
               } else {
                 obstacleSound = new Audio('audio/Car_Crash.mp3');
               }
@@ -363,7 +363,7 @@ const animate = () => {
               enemy.hitpoints -= 50000000;
               myGame.activePlayer.score += enemy.points;
             } else {
-              myGame.activePlayer.score -= (enemy.damage * myGame.playerSpeedAdjust);
+              myGame.activePlayer.score -= Math.floor(enemy.points * myGame.playerSpeedAdjust / 500) * 500;
               myGame.activePlayer.hitpoints -= enemy.damage;
             }
             myGame.message = `Player took some damage from collision with ${enemy.type}!`
@@ -402,7 +402,7 @@ const animate = () => {
           }
           // set enemy's dead flag if hp below 0
           if (enemy.hitpoints < 0) {
-            myGame.activePlayer.score += (enemy.points * myGame.playerSpeedAdjust);
+            myGame.activePlayer.score += Math.floor(enemy.points * myGame.playerSpeedAdjust * 500) / 500;
             $('.score-meter').text(myGame.activePlayer.score);
             enemy.alive = false;
             myGame.enemyRemovedFlag = true;

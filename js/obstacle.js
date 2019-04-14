@@ -2,7 +2,7 @@
 /* eslint-disable object-property-newline */
 /* eslint-disable quotes */
 
-// Terrain such as ice, road shoulder, road beyond shoulder, water
+// Terrain such as ice, road shoulder, etc
 class Obstacle {
   constructor(type, icon, startX, startY, width, height, color) {
     this.type = type;
@@ -43,7 +43,7 @@ class CivilianCar extends Obstacle {
     super('civilian car', icon, startX, startY);
     this.hitpoints = 1;
     this.speed = 1.25;
-    this.points = 100;
+    this.points = 500;
     this.width = 25;
     this.height = 50;
     this.color = 'red';
@@ -55,7 +55,7 @@ class CivilianBike extends Obstacle {
     super('civilian bike', icon, startX, startY);
     this.hitpoints = 1;
     this.speed = 1.5;
-    this.points = 200;
+    this.points = 1000;
     this.width = 10;
     this.height = 20;
     this.color = 'orange';

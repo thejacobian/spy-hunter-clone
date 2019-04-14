@@ -10,6 +10,7 @@ class Game {
     this.bgImage = bgImage;
     this.speedSound = new Audio('audio/Shift_Gears.mp3');
     this.brakeSound = new Audio('audio/Car_Brake.mp3');
+    this.helicopterSound = new Audio('audio/Helicopter.mp3');
     this.$commsBar = $('.game-comms').children('h1').eq(0);
     this.$gameCanvas = $('#game-canvas');
     this.$myPlayerScoreLoc = $('#player-one-score');
@@ -184,15 +185,15 @@ class Game {
       for (let i = 0; i < randomNumEnemies; i++) {
         randomChance = Math.random(); // used for differing rate of enemy appearance below
         randomX = this.getRandomInt(myGame.leftShoulderTile.width + 50, myGame.rightShoulderTile.x - 50);
-        if (randomChance < 0.01 * myGame.level) {
+        if (randomChance < (0.01 * myGame.level)) {
           enemyTile = new MasterOfTheSkies ('master of the skies', 'master_of_the_skies_icon.png', randomX, 0);
-          const helicopterSound = new Audio(enemyTile.sound);
-          enemyTile.play();
-        } else if (randomChance < 0.02 * myGame.level) {
+          this.helicopterSound.pause();
+          this.helicopterSound.play();
+        } else if (randomChance < (0.02 * myGame.level)) {
           enemyTile = new DoubleBarrelAction ('doublebarrel action', 'doublebarel_action_icon.png', randomX, 0);
-        } else if (randomChance < 0.08 * myGame.level) {
+        } else if (randomChance < (0.08 * myGame.level)) {
           enemyTile = new BulletproofBully ('bulletproof bully', 'bulletproof_bully_icon.png', randomX, 0);
-        } else if (randomChance < 0.10 * myGame.level) {
+        } else if (randomChance < (0.10 * myGame.level)) {
           enemyTile = new Tireslasher ('tireslasher', 'tireslasher_icon.png', randomX, 0);
         } else {
           enemyTile = new Enemy ('basic enemy', 'basic_enemy_icon.png', randomX, 0);
